@@ -1,0 +1,6 @@
+flask==2.3.3
+flask-jwt-extended==4.5.2
+sqlalchemy==2.0.20
+pytest==7.4.2
+pytest-flask==1.2.0
+python-dotenv==1.0.0

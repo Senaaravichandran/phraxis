@@ -1,0 +1,126 @@
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+}
+
+.app-header {
+  padding: 1.5rem 2rem;
+  background: rgba(37, 99, 235, 0.1);
+  border-bottom: 2px solid #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.logo h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tagline {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.dashboard {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.panel {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.panel:hover {
+  border-color: rgba(37, 99, 235, 0.6);
+  box-shadow: 0 12px 48px rgba(37, 99, 235, 0.2);
+}
+
+.voice-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.transcript-panel {
+  gap: 1rem;
+}
+
+.code-panel {
+  overflow-y: auto;
+}
+
+.pr-panel {
+  overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.code-panel::-webkit-scrollbar,
+.pr-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.code-panel::-webkit-scrollbar-track,
+.pr-panel::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 4px;
+}
+
+.code-panel::-webkit-scrollbar-thumb,
+.pr-panel::-webkit-scrollbar-thumb {
+  background: rgba(37, 99, 235, 0.5);
+  border-radius: 4px;
+}
+
+.code-panel::-webkit-scrollbar-thumb:hover,
+.pr-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(37, 99, 235, 0.7);
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+  }
+}
+
+/* Made with Bob */
