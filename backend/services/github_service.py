@@ -7,11 +7,14 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import base64
 
-from github import Github, GithubException
+from github import Github, GithubException, InputGitTreeElement
 from github.Repository import Repository
 from github.GitRef import GitRef
 
-from backend.env_loader import get_config
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from env_loader import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +207,8 @@ class GitHubService:
         try:
             # Get the branch reference
             branch_ref = repo.get_git_ref(f"heads/{branch_name}")
-            base_tree_sha = repo.get_git_commit(branch_ref.object.sha).tree.sha
+            base_commit = repo.get_git_commit(branch_ref.object.sha)
+            base_tree = repo.get_git_tree(base_commit.tree.sha)
             
             logger.info(f"Committing {len(files_changed)} files to branch: {branch_name}")
             
@@ -216,15 +220,17 @@ class GitHubService:
                 # Create blob for file content
                 blob = repo.create_git_blob(content, "utf-8")
                 
-                tree_elements.append({
-                    "path": file_path,
-                    "mode": "100644",  # Regular file
-                    "type": "blob",
-                    "sha": blob.sha
-                })
+                tree_elements.append(
+                    InputGitTreeElement(
+                        path=file_path,
+                        mode="100644",
+                        type="blob",
+                        sha=blob.sha
+                    )
+                )
             
             # Create tree
-            tree = repo.create_git_tree(tree_elements, base_tree_sha)
+            tree = repo.create_git_tree(tree_elements, base_tree)
             
             # Create commit
             commit_message = self._generate_commit_message(intent, files_changed)
@@ -386,8 +392,8 @@ class GitHubService:
                 "body": pr.body,
                 "state": pr.state,
                 "url": pr.html_url,
-                "created_at": pr.created_at.isoformat(),
-                "updated_at": pr.updated_at.isoformat(),
+                "created_at": pr.created_at.isoformat() if pr.created_at else None,
+                "updated_at": pr.updated_at.isoformat() if pr.updated_at else None,
                 "merged": pr.merged,
                 "mergeable": pr.mergeable,
                 "head_branch": pr.head.ref,
@@ -417,13 +423,15 @@ class GitHubService:
             prs = self.repo.get_pulls(state=state)
             
             result = []
-            for pr in prs[:limit]:
+            # Convert to list and slice to avoid type checker issues with PaginatedList
+            pr_list = list(prs)[:limit]
+            for pr in pr_list:
                 result.append({
                     "number": pr.number,
                     "title": pr.title,
                     "state": pr.state,
                     "url": pr.html_url,
-                    "created_at": pr.created_at.isoformat(),
+                    "created_at": pr.created_at.isoformat() if pr.created_at else None,
                     "head_branch": pr.head.ref,
                     "base_branch": pr.base.ref
                 })

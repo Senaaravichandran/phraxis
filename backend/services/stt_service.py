@@ -3,13 +3,18 @@ IBM Watson Speech-to-Text service for PHRAXIS.
 Transcribes audio input from voice capture into text.
 """
 import logging
-from typing import Dict, Any, List
+import mimetypes
+from typing import Dict, Any, List, cast
+from io import BytesIO
 from ibm_watson import SpeechToTextV1
 from ibm_watson.websocket import RecognizeCallback, AudioSource
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ibm_cloud_sdk_core import ApiException
 
-from backend.env_loader import get_config
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from env_loader import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -70,12 +75,19 @@ class STTService:
             }
         
         try:
-            logger.info(f"Transcribing audio: {len(audio_bytes)} bytes, type: {content_type}")
+            normalized_content_type = self._normalize_content_type(content_type)
+            logger.info(
+                f"Transcribing audio: {len(audio_bytes)} bytes, "
+                f"type: {content_type}, normalized: {normalized_content_type}"
+            )
+            
+            # Convert bytes to file-like object for Watson API
+            audio_file = BytesIO(audio_bytes)
             
             # Call IBM Watson STT API
             response = self.stt.recognize(
-                audio=audio_bytes,
-                content_type=content_type,
+                audio=audio_file,
+                content_type=normalized_content_type,
                 model='en-US_BroadbandModel',
                 timestamps=True,
                 word_confidence=True,
@@ -83,8 +95,11 @@ class STTService:
                 speaker_labels=False
             ).get_result()
             
+            # Cast response to Dict since get_result() returns DetailedResponse which behaves like a dict
+            response_dict = cast(Dict[str, Any], response)
+            
             # Parse response
-            if not response.get('results'):
+            if not response_dict.get('results'):
                 logger.warning("No transcription results returned")
                 return {
                     "transcript": "",
@@ -94,7 +109,7 @@ class STTService:
                 }
             
             # Extract best alternative from results
-            results = response['results']
+            results = response_dict['results']
             alternatives = results[0].get('alternatives', [])
             
             if not alternatives:
@@ -149,6 +164,37 @@ class STTService:
             error_msg = f"Unexpected error during transcription: {str(e)}"
             logger.error(error_msg)
             raise STTServiceError(error_msg)
+
+    def _normalize_content_type(self, content_type: str) -> str:
+        """
+        Normalize browser upload MIME types into values accepted by Watson STT.
+        """
+        normalized = (content_type or "audio/webm").split(";")[0].strip().lower()
+
+        content_type_map = {
+            "audio/webm": "audio/webm",
+            "video/webm": "audio/webm",
+            "audio/ogg": "audio/ogg",
+            "video/ogg": "audio/ogg",
+            "audio/wav": "audio/wav",
+            "audio/x-wav": "audio/wav",
+            "audio/wave": "audio/wav",
+            "audio/flac": "audio/flac",
+            "audio/mpeg": "audio/mp3",
+            "audio/mp3": "audio/mp3",
+            "audio/mp4": "audio/mp4",
+            "audio/m4a": "audio/mp4",
+        }
+
+        if normalized in content_type_map:
+            return content_type_map[normalized]
+
+        guessed_content_type, _ = mimetypes.guess_type(f"upload.{normalized.split('/')[-1]}")
+        if guessed_content_type in content_type_map:
+            return content_type_map[guessed_content_type]
+
+        logger.warning(f"Unknown audio content type '{content_type}', defaulting to audio/webm")
+        return "audio/webm"
     
     def get_models(self) -> List[Dict[str, Any]]:
         """
@@ -159,8 +205,10 @@ class STTService:
             List of available models with their details
         """
         try:
-            models = self.stt.list_models().get_result()
-            return models.get('models', [])
+            models_response = self.stt.list_models().get_result()
+            # Cast response to Dict for type safety
+            models_dict = cast(Dict[str, Any], models_response)
+            return models_dict.get('models', [])
         except ApiException as e:
             logger.error(f"Failed to list STT models: {e}")
             return []

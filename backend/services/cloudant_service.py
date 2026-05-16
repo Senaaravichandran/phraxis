@@ -3,13 +3,16 @@ IBM Cloudant database service for PHRAXIS.
 Stores and manages intent data and processing status.
 """
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, cast
 from datetime import datetime
 from ibmcloudant.cloudant_v1 import CloudantV1, Document
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ibm_cloud_sdk_core import ApiException
 
-from backend.env_loader import get_config
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from env_loader import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +28,7 @@ class CloudantService:
     Manages intent storage, retrieval, and status tracking.
     """
     
-    def __init__(self):
+    def __init__(self, db_name: str = "phraxis_intents"):
         """Initialize the Cloudant service with IBM credentials."""
         config = get_config()
         
@@ -33,7 +36,7 @@ class CloudantService:
             authenticator = IAMAuthenticator(config.IBM_CLOUDANT_API_KEY)
             self.client = CloudantV1(authenticator=authenticator)
             self.client.set_service_url(config.IBM_CLOUDANT_URL)
-            self.db_name = config.IBM_CLOUDANT_DB_NAME
+            self.db_name = db_name
             
             # Ensure database exists
             self._ensure_database_exists()
@@ -77,7 +80,7 @@ class CloudantService:
         """
         try:
             # Add metadata
-            document = {
+            document_dict = {
                 **intent,
                 "type": "intent",
                 "status": "pending",
@@ -87,13 +90,15 @@ class CloudantService:
             
             logger.info(f"Saving intent: action={intent.get('action')}")
             
-            # Save document
-            response = self.client.post_document(
+            # Save document - wrap dict in Document object
+            result = self.client.post_document(
                 db=self.db_name,
-                document=document
+                document=Document(**document_dict)
             ).get_result()
             
-            doc_id = response.get('id')
+            doc_id = result.get('id') if isinstance(result, dict) else None
+            if not doc_id:
+                raise CloudantServiceError("Failed to get document ID from Cloudant response")
             logger.info(f"Intent saved successfully with ID: {doc_id}")
             return doc_id
             
@@ -129,7 +134,8 @@ class CloudantService:
             ).get_result()
             
             logger.info(f"Intent retrieved successfully: {doc_id}")
-            return response
+            # Type cast for proper type checking
+            return cast(Dict[str, Any], response)
             
         except ApiException as e:
             if e.code == 404:
@@ -172,7 +178,9 @@ class CloudantService:
                 limit=limit
             ).get_result()
             
-            docs = response.get('docs', [])
+            # Type cast for proper type checking
+            result = cast(Dict[str, Any], response)
+            docs: List[Dict[str, Any]] = result.get('docs', [])
             logger.info(f"Retrieved {len(docs)} intents")
             return docs
             
@@ -223,10 +231,10 @@ class CloudantService:
             if result:
                 doc['result'] = result
             
-            # Save updated document
+            # Save updated document - wrap dict in Document object
             response = self.client.post_document(
                 db=self.db_name,
-                document=doc
+                document=Document(**doc)
             ).get_result()
             
             logger.info(f"Intent status updated successfully: {doc_id} -> {status}")
@@ -299,7 +307,7 @@ class CloudantService:
         try:
             logger.info(f"Querying intents with status: {status} (limit: {limit})")
             
-            response = self.client.post_find(
+            result = self.client.post_find(
                 db=self.db_name,
                 selector={
                     "type": {"$eq": "intent"},
@@ -309,7 +317,10 @@ class CloudantService:
                 limit=limit
             ).get_result()
             
-            docs = response.get('docs', [])
+            if not isinstance(result, dict):
+                raise CloudantServiceError(f"Unexpected response type from Cloudant: {type(result)}")
+            
+            docs: List[Dict[str, Any]] = result.get('docs', [])
             logger.info(f"Retrieved {len(docs)} intents with status: {status}")
             return docs
             

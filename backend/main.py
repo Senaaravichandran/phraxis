@@ -3,22 +3,27 @@ PHRAXIS FastAPI application.
 Voice-to-code system powered by IBM Watson and IBM Bob.
 """
 import logging
+import sys
+from pathlib import Path
 from typing import Dict, Any, List
 from contextlib import asynccontextmanager
+
+# Add backend directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from backend.env_loader import validate_environment, get_config
-from backend.services.stt_service import STTService, STTServiceError
-from backend.services.nlu_service import NLUService, NLUServiceError
-from backend.services.cloudant_service import CloudantService, CloudantServiceError
-from backend.services.watsonx_service import WatsonxService, WatsonxServiceError
-from backend.services.bob_orchestrator import BobOrchestrator, BobOrchestratorError
-from backend.services.streaming_orchestrator import StreamingOrchestrator
-from backend.services.github_service import GitHubService, GitHubServiceError
+from env_loader import validate_environment, get_config
+from services.stt_service import STTService, STTServiceError
+from services.nlu_service import NLUService, NLUServiceError
+from services.cloudant_service import CloudantService, CloudantServiceError
+from services.watsonx_service import WatsonxService, WatsonxServiceError
+from services.bob_orchestrator import BobOrchestrator, BobOrchestratorError
+from services.streaming_orchestrator import StreamingOrchestrator
+from services.github_service import GitHubService, GitHubServiceError
 
 # Configure logging
 logging.basicConfig(
@@ -54,7 +59,10 @@ class IntentResponse(BaseModel):
 class GenerateCodeRequest(BaseModel):
     """Request model for code generation."""
     intent_doc_id: str
-    repo_path: str = Field(default="demo_repo", description="Path to repository")
+    repo_path: str = Field(
+        default="",
+        description="GitHub repository URL or local repository path (resolved from .env if empty)"
+    )
 
 
 class OpenPRRequest(BaseModel):
@@ -183,6 +191,18 @@ async def transcribe_audio(
         
         if len(audio_bytes) == 0:
             raise HTTPException(status_code=400, detail="Empty audio file")
+
+        # Support the frontend text fallback without sending it through STT.
+        if (audio.content_type or "").split(";")[0].strip().lower() == "text/plain":
+            transcript = audio_bytes.decode("utf-8", errors="ignore").strip()
+            if not transcript:
+                raise HTTPException(status_code=400, detail="Empty text input")
+
+            return TranscribeResponse(
+                transcript=transcript,
+                confidence=1.0,
+                words=[]
+            )
         
         # Transcribe using STT service
         result = stt_service.transcribe_audio(
@@ -198,6 +218,9 @@ async def transcribe_audio(
     except STTServiceError as e:
         logger.error(f"STT service error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+    except HTTPException:
+        raise
     
     except Exception as e:
         logger.error(f"Unexpected error in transcribe endpoint: {e}")
@@ -249,20 +272,27 @@ async def extract_intent(request: IntentRequest):
     except CloudantServiceError as e:
         logger.error(f"Cloudant service error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+    except HTTPException:
+        raise
     
     except Exception as e:
         logger.error(f"Unexpected error in extract_intent endpoint: {e}")
         raise HTTPException(status_code=500, detail=f"Intent extraction failed: {str(e)}")
 
 
-@app.post("/api/generate/code")
-async def generate_code(request: GenerateCodeRequest):
+@app.get("/api/generate/code")
+async def generate_code(
+    intent_doc_id: str,
+    repo_path: str = ""
+):
     """
     Generate code using Bob orchestration with streaming progress updates.
     Returns Server-Sent Events stream.
     
     Args:
-        request: Request containing intent document ID and repository path
+        intent_doc_id: Intent document ID from Cloudant
+        repo_path: GitHub repository URL or local path for Bob analysis
     
     Returns:
         SSE stream of progress events
@@ -270,14 +300,17 @@ async def generate_code(request: GenerateCodeRequest):
     if cloudant_service is None or streaming_orchestrator is None:
         raise HTTPException(status_code=503, detail="Services not initialized")
     
+    if not intent_doc_id or intent_doc_id == "undefined":
+        raise HTTPException(status_code=400, detail="Invalid intent_doc_id")
+    
     try:
-        logger.info(f"Starting code generation for intent: {request.intent_doc_id}")
+        logger.info(f"Starting code generation for intent: {intent_doc_id}")
         
         # Get intent from Cloudant
-        intent = cloudant_service.get_intent(request.intent_doc_id)
+        intent = cloudant_service.get_intent(intent_doc_id)
         
         # Update status to processing
-        cloudant_service.update_intent_status(request.intent_doc_id, "processing")
+        cloudant_service.update_intent_status(intent_doc_id, "processing")
         
         # Stream Bob orchestration progress
         async def event_generator():
@@ -286,18 +319,18 @@ async def generate_code(request: GenerateCodeRequest):
             try:
                 async for event in streaming_orchestrator.orchestrate_stream(
                     intent=intent,
-                    repo_path=request.repo_path
+                    repo_path=repo_path
                 ):
                     yield event
                 
                 # Update status to complete
-                cloudant_service.update_intent_status(request.intent_doc_id, "complete")
+                cloudant_service.update_intent_status(intent_doc_id, "complete")
                 
             except Exception as e:
                 logger.error(f"Error during code generation: {e}")
                 # Update status to error
                 cloudant_service.update_intent_status(
-                    request.intent_doc_id,
+                    intent_doc_id,
                     "error",
                     {"error": str(e)}
                 )
@@ -312,13 +345,19 @@ async def generate_code(request: GenerateCodeRequest):
             headers={
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
-                "X-Accel-Buffering": "no"
+                "X-Accel-Buffering": "no",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, OPTIONS",
+                "Access-Control-Allow-Headers": "*"
             }
         )
         
     except CloudantServiceError as e:
         logger.error(f"Cloudant service error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+    except HTTPException:
+        raise
     
     except Exception as e:
         logger.error(f"Unexpected error in generate_code endpoint: {e}")
@@ -386,6 +425,9 @@ async def open_pr(request: OpenPRRequest):
     except GitHubServiceError as e:
         logger.error(f"GitHub service error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+    except HTTPException:
+        raise
     
     except Exception as e:
         logger.error(f"Unexpected error in open_pr endpoint: {e}")
@@ -419,6 +461,9 @@ async def list_intents(limit: int = 20):
     except CloudantServiceError as e:
         logger.error(f"Cloudant service error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+    except HTTPException:
+        raise
     
     except Exception as e:
         logger.error(f"Unexpected error in list_intents endpoint: {e}")
@@ -539,6 +584,9 @@ async def list_prs(state: str = "open", limit: int = 20):
     except GitHubServiceError as e:
         logger.error(f"GitHub service error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+    except HTTPException:
+        raise
 
 
 # Made with Bob

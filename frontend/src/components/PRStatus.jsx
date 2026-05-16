@@ -30,7 +30,7 @@ function PRStatus({ prUrl, prNumber, filesChanged, elapsedTime, generationStatus
         <h3 className="panel-title">Pull Request Status</h3>
         <div className="generating-state">
           <div className="spinner"></div>
-          <p>Bob is generating code...</p>
+          <p>WatsonX is generating code...</p>
           <p className="sub-text">PR will be created automatically when complete</p>
         </div>
       </div>
@@ -128,7 +128,7 @@ function PRStatus({ prUrl, prNumber, filesChanged, elapsedTime, generationStatus
           </div>
           <div className="impact-description">
             <p>From voice to production-ready code in under {elapsedTime || '4'} seconds</p>
-            <p className="powered-by">Powered by IBM Bob + Watson AI</p>
+            <p className="powered-by">Powered by IBM WatsonX + Watson AI</p>
           </div>
         </div>
       </div>

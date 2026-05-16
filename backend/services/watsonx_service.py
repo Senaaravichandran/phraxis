@@ -9,7 +9,10 @@ from typing import Dict, Any
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ibm_cloud_sdk_core import ApiException
 
-from backend.env_loader import get_config
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from env_loader import get_config
 
 logger = logging.getLogger(__name__)
 

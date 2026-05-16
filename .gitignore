@@ -1,0 +1,21 @@
+# User specific
+data.json
+.env
+.env.example
+
+# Dependencies
+node_modules/
+__pycache__/
+venv/
+env/
+
+# Build and Temp
+dist/
+build/
+.bobignore
+.phraxis_repo_cache/
+bob_sessions/
+
+# OS specific
+.DS_Store
+Thumbs.db

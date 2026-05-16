@@ -39,10 +39,22 @@ function VoiceCapture({ isRecording, setIsRecording, onRecordingComplete, genera
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm'
-      });
+
+      const preferredMimeTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/ogg',
+      ];
+      const selectedMimeType = preferredMimeTypes.find((mimeType) => (
+        typeof MediaRecorder.isTypeSupported === 'function'
+          ? MediaRecorder.isTypeSupported(mimeType)
+          : mimeType === 'audio/webm'
+      ));
+
+      const mediaRecorder = selectedMimeType
+        ? new MediaRecorder(stream, { mimeType: selectedMimeType })
+        : new MediaRecorder(stream);
       
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -54,7 +66,10 @@ function VoiceCapture({ isRecording, setIsRecording, onRecordingComplete, genera
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(
+          audioChunksRef.current,
+          { type: mediaRecorder.mimeType || selectedMimeType || 'audio/webm' }
+        );
         onRecordingComplete(audioBlob);
         
         // Stop all tracks
@@ -96,7 +111,7 @@ function VoiceCapture({ isRecording, setIsRecording, onRecordingComplete, genera
   const getStatusText = () => {
     if (generationStatus === 'transcribing') return 'Transcribing...';
     if (generationStatus === 'extracting') return 'Extracting intent...';
-    if (generationStatus === 'generating') return 'Bob is working...';
+    if (generationStatus === 'generating') return 'WatsonX is generating code...';
     if (generationStatus === 'complete') return 'Complete!';
     if (isRecording) return 'Recording...';
     return 'Speak your feature idea';
@@ -144,7 +159,7 @@ function VoiceCapture({ isRecording, setIsRecording, onRecordingComplete, genera
               type="text"
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              placeholder="e.g., Add rate limiting - 100 requests per minute for free users"
+              placeholder="e.g., Add authentication to the login endpoint"
               className="text-input"
               disabled={isProcessing}
             />

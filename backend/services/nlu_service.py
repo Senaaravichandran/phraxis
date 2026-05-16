@@ -4,7 +4,8 @@ Extracts structured intent from transcribed voice commands.
 """
 import logging
 import re
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, cast
+from io import BytesIO
 from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_watson.natural_language_understanding_v1 import (
     Features,
@@ -16,7 +17,10 @@ from ibm_watson.natural_language_understanding_v1 import (
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ibm_cloud_sdk_core import ApiException
 
-from backend.env_loader import get_config
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from env_loader import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +99,9 @@ class NLUService:
             ).get_result()
             
             # Post-process NLU response into structured intent
-            intent = self._parse_nlu_response(text, response)
+            # Cast response to Dict since get_result() returns DetailedResponse which behaves like a dict
+            response_dict = cast(Dict[str, Any], response)
+            intent = self._parse_nlu_response(text, response_dict)
             
             logger.info(f"Intent extracted: action={intent['action']}, module={intent['target_module']}")
             return intent

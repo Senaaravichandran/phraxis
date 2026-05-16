@@ -5,6 +5,7 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
   const architectRef = useRef(null);
   const planRef = useRef(null);
   const codeRef = useRef(null);
+  const getType = (event) => event.type || event.event;
 
   // Auto-scroll to bottom when new content arrives
   useEffect(() => {
@@ -15,28 +16,28 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
 
   // Filter progress by type
   const architectEvents = liveProgress.filter(e => 
-    e.type === 'architect_started' || e.type === 'architect_complete' || 
-    (e.type === 'progress' && e.stage === 'architect')
+    getType(e) === 'architect_started' || getType(e) === 'architect_complete' || 
+    (getType(e) === 'progress' && e.stage === 'architect')
   );
   
   const planEvents = liveProgress.filter(e => 
-    e.type === 'plan_started' || e.type === 'plan_complete' ||
-    (e.type === 'progress' && e.stage === 'plan')
+    getType(e) === 'plan_started' || getType(e) === 'plan_complete' ||
+    (getType(e) === 'progress' && e.stage === 'plan')
   );
   
   const codeEvents = liveProgress.filter(e => 
-    e.type === 'code_started' || e.type === 'code_step' || e.type === 'code_complete' ||
-    (e.type === 'progress' && e.stage === 'code')
+    getType(e) === 'code_started' || getType(e) === 'code_step' || getType(e) === 'code_step_error' || getType(e) === 'code_complete' ||
+    (getType(e) === 'progress' && e.stage === 'code')
   );
 
-  const isArchitectActive = architectEvents.length > 0 && !architectEvents.some(e => e.type === 'architect_complete');
-  const isPlanActive = planEvents.length > 0 && !planEvents.some(e => e.type === 'plan_complete');
-  const isCodeActive = codeEvents.length > 0 && !codeEvents.some(e => e.type === 'code_complete');
+  const isArchitectActive = architectEvents.length > 0 && !architectEvents.some(e => getType(e) === 'architect_complete');
+  const isPlanActive = planEvents.length > 0 && !planEvents.some(e => getType(e) === 'plan_complete');
+  const isCodeActive = codeEvents.length > 0 && !codeEvents.some(e => getType(e) === 'code_complete');
 
   if (generationStatus === 'idle' || generationStatus === 'transcribing' || generationStatus === 'extracting') {
     return (
       <div className="live-code-panel">
-        <h3 className="panel-title">Bob's Workspace</h3>
+        <h3 className="panel-title">WatsonX Workspace</h3>
         <div className="empty-state">
           <p>Waiting for code generation to start...</p>
         </div>
@@ -54,7 +55,7 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
           <span className="section-icon">🏗️</span>
           <h4>Architect Mode</h4>
           {isArchitectActive && <span className="status-badge active">Active</span>}
-          {architectEvents.some(e => e.type === 'architect_complete') && (
+          {architectEvents.some(e => getType(e) === 'architect_complete') && (
             <span className="status-badge complete">Complete</span>
           )}
         </div>
@@ -64,10 +65,10 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
           ) : (
             architectEvents.map((event, index) => (
               <div key={index} className="progress-item animate-in">
-                {event.type === 'architect_started' && (
+                {getType(event) === 'architect_started' && (
                   <p className="info-text">📖 Reading repository structure...</p>
                 )}
-                {event.type === 'architect_complete' && event.result && (
+                {getType(event) === 'architect_complete' && event.result && (
                   <>
                     <p className="success-text">✓ Repository analysis complete</p>
                     {event.result.files_to_modify && (
@@ -93,7 +94,7 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
           <span className="section-icon">📋</span>
           <h4>Plan Mode</h4>
           {isPlanActive && <span className="status-badge active">Active</span>}
-          {planEvents.some(e => e.type === 'plan_complete') && (
+          {planEvents.some(e => getType(e) === 'plan_complete') && (
             <span className="status-badge complete">Complete</span>
           )}
         </div>
@@ -103,12 +104,22 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
           ) : (
             planEvents.map((event, index) => (
               <div key={index} className="progress-item animate-in">
-                {event.type === 'plan_started' && (
-                  <p className="info-text">🎯 Creating implementation plan...</p>
+                {getType(event) === 'plan_started' && (
+                  <p className="info-text">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{display: 'inline', marginRight: '8px', verticalAlign: 'middle'}}>
+                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                    </svg>
+                    Creating implementation plan...
+                  </p>
                 )}
-                {event.type === 'plan_complete' && event.result && (
+                {getType(event) === 'plan_complete' && event.result && (
                   <>
-                    <p className="success-text">✓ Implementation plan ready</p>
+                    <p className="success-text">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{display: 'inline', marginRight: '8px', verticalAlign: 'middle'}}>
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+                      </svg>
+                      Implementation plan ready
+                    </p>
                     {event.result.steps && (
                       <div className="plan-steps">
                         {event.result.steps.slice(0, 5).map((step, i) => (
@@ -137,7 +148,7 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
           <span className="section-icon">💻</span>
           <h4>Code Mode</h4>
           {isCodeActive && <span className="status-badge active">Active</span>}
-          {codeEvents.some(e => e.type === 'code_complete') && (
+          {codeEvents.some(e => getType(e) === 'code_complete') && (
             <span className="status-badge complete">Complete</span>
           )}
         </div>
@@ -147,12 +158,12 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
           ) : (
             codeEvents.map((event, index) => (
               <div key={index} className="progress-item animate-in">
-                {event.type === 'code_started' && (
+                {getType(event) === 'code_started' && (
                   <p className="info-text">⚡ Generating code...</p>
                 )}
-                {event.type === 'code_step' && (
+                {getType(event) === 'code_step' && (
                   <div className="code-step">
-                    <p className="file-path">📄 {event.file || 'Working...'}</p>
+                    <p className="file-path">📄 {event.file || event.data?.file_path || 'Working...'}</p>
                     {event.content && (
                       <pre className="code-block">
                         <code>{event.content}</code>
@@ -163,7 +174,10 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
                     )}
                   </div>
                 )}
-                {event.type === 'code_complete' && (
+                {getType(event) === 'code_step_error' && (
+                  <p className="info-text">Error: {event.message}</p>
+                )}
+                {getType(event) === 'code_complete' && (
                   <p className="success-text">✓ Code generation complete!</p>
                 )}
                 {event.message && !event.content && (

@@ -29,7 +29,6 @@ class EnvConfig:
     # IBM Cloudant Database
     IBM_CLOUDANT_URL: str
     IBM_CLOUDANT_API_KEY: str
-    IBM_CLOUDANT_DB_NAME: str
     
     # IBM WatsonX AI
     WATSONX_API_KEY: str
@@ -60,7 +59,6 @@ class EnvConfig:
             # IBM Cloudant
             'IBM_CLOUDANT_URL': 'IBM Cloudant database URL',
             'IBM_CLOUDANT_API_KEY': 'IBM Cloudant API key',
-            'IBM_CLOUDANT_DB_NAME': 'IBM Cloudant database name',
             
             # IBM WatsonX
             'WATSONX_API_KEY': 'IBM WatsonX API key',
@@ -145,11 +143,11 @@ def validate_environment():
     """
     try:
         config = get_config()
-        print("✓ Environment variables validated successfully")
-        print(f"✓ Loaded configuration: {config}")
+        print("[OK] Environment variables validated successfully")
+        print(f"[OK] Loaded configuration: {config}")
         return config
     except EnvironmentError as e:
-        print(f"✗ Environment validation failed:\n{e}")
+        print(f"[ERROR] Environment validation failed:\n{e}")
         raise
 
 # Made with Bob
