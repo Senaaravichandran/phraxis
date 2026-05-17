@@ -12,10 +12,17 @@ function PRStatus({ prUrl, prNumber, filesChanged, elapsedTime, generationStatus
     }
   }, [prUrl]);
 
-  if (generationStatus === 'idle' || generationStatus === 'transcribing' || generationStatus === 'extracting') {
+  if (
+    generationStatus === 'idle' ||
+    generationStatus === 'recording' ||
+    generationStatus === 'transcribing' ||
+    generationStatus === 'extracting_intent' ||
+    generationStatus === 'quantum_optimizing'
+  ) {
     return (
       <div className="pr-status">
         <h3 className="panel-title">Pull Request Status</h3>
+        <p className="panel-subtitle">IBM watsonx.ai code output is packaged into a GitHub pull request.</p>
         <div className="empty-state">
           <GitPullRequest size={48} className="empty-icon" />
           <p>Waiting for code generation...</p>
@@ -24,10 +31,11 @@ function PRStatus({ prUrl, prNumber, filesChanged, elapsedTime, generationStatus
     );
   }
 
-  if (generationStatus === 'generating') {
+  if (generationStatus === 'generating_code') {
     return (
       <div className="pr-status">
         <h3 className="panel-title">Pull Request Status</h3>
+        <p className="panel-subtitle">IBM watsonx.ai is still generating the code before PR creation.</p>
         <div className="generating-state">
           <div className="spinner"></div>
           <p>WatsonX is generating code...</p>
@@ -41,6 +49,7 @@ function PRStatus({ prUrl, prNumber, filesChanged, elapsedTime, generationStatus
     return (
       <div className="pr-status">
         <h3 className="panel-title">Pull Request Status</h3>
+        <p className="panel-subtitle">IBM watsonx.ai will hand off the finished changes to GitHub.</p>
         <div className="empty-state">
           <p>Waiting for pull request creation...</p>
         </div>
@@ -51,6 +60,7 @@ function PRStatus({ prUrl, prNumber, filesChanged, elapsedTime, generationStatus
   return (
     <div className="pr-status">
       <h3 className="panel-title">Pull Request Status</h3>
+      <p className="panel-subtitle">WatsonX-generated code is turned into a PR with tracked files and timing.</p>
 
       {/* Success Animation */}
       <div className={`success-animation ${showCheckmark ? 'show' : ''}`}>

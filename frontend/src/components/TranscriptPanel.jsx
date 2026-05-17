@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import './TranscriptPanel.css';
 
-function TranscriptPanel({ transcript, confidence, words }) {
+function TranscriptPanel({ transcript, confidence, words, isTextMode }) {
+  const confidenceFill = confidence > 0.8
+    ? 'linear-gradient(90deg, #f5f5f5, #cfcfcf)'
+    : confidence > 0.6
+    ? 'linear-gradient(90deg, #cfcfcf, #9f9f9f)'
+    : 'linear-gradient(90deg, #9f9f9f, #6f6f6f)';
+
   const [displayedText, setDisplayedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -52,9 +58,14 @@ function TranscriptPanel({ transcript, confidence, words }) {
   if (!transcript) {
     return (
       <div className="transcript-panel-content">
-        <h3 className="panel-title">Transcript</h3>
+        <h3 className="panel-title">{isTextMode ? 'Typed Feature' : 'Transcript'}</h3>
+        <p className="panel-subtitle">
+          {isTextMode
+            ? 'Reads your typed request and prepares it for IBM NLU.'
+            : 'IBM Watson Speech to Text turns your audio into readable text.'}
+        </p>
         <div className="empty-state">
-          <p>Waiting for voice input...</p>
+          <p>{isTextMode ? 'Awaiting typed feature...' : 'Awaiting transcript...'}</p>
         </div>
       </div>
     );
@@ -62,7 +73,12 @@ function TranscriptPanel({ transcript, confidence, words }) {
 
   return (
     <div className="transcript-panel-content">
-      <h3 className="panel-title">Transcript</h3>
+      <h3 className="panel-title">{isTextMode ? 'Typed Feature' : 'Transcript'}</h3>
+      <p className="panel-subtitle">
+        {isTextMode
+          ? 'Typed text is sent into IBM Natural Language Understanding.'
+          : 'Word confidence and timing come from IBM Watson STT.'}
+      </p>
       
       <div className="transcript-text">
         {highlightKeywords(displayedText)}
@@ -73,7 +89,7 @@ function TranscriptPanel({ transcript, confidence, words }) {
 
       <div className="confidence-section">
         <div className="confidence-label">
-          <span>IBM Watson Confidence</span>
+          <span>{isTextMode ? 'Text Input Confidence' : 'IBM Watson Confidence'}</span>
           <span className="confidence-value">{(confidence * 100).toFixed(1)}%</span>
         </div>
         <div className="confidence-bar">
@@ -81,11 +97,7 @@ function TranscriptPanel({ transcript, confidence, words }) {
             className="confidence-fill"
             style={{ 
               width: `${confidence * 100}%`,
-              background: confidence > 0.8 
-                ? 'linear-gradient(90deg, #22c55e, #16a34a)'
-                : confidence > 0.6
-                ? 'linear-gradient(90deg, #f59e0b, #d97706)'
-                : 'linear-gradient(90deg, #ef4444, #dc2626)'
+              background: confidenceFill
             }}
           />
         </div>

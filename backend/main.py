@@ -24,6 +24,7 @@ from services.watsonx_service import WatsonxService, WatsonxServiceError
 from services.bob_orchestrator import BobOrchestrator, BobOrchestratorError
 from services.streaming_orchestrator import StreamingOrchestrator
 from services.github_service import GitHubService, GitHubServiceError
+from services.qope import QOPEService, QOPEServiceError
 
 # Configure logging
 logging.basicConfig(
@@ -81,6 +82,23 @@ class PRResponse(BaseModel):
     commit_sha: str
 
 
+class QuantumOptimizeRequest(BaseModel):
+    """Request model for quantum optimization."""
+    doc_id: str
+    candidate_changes: List[Dict[str, Any]]
+    conflict_matrix: List[List[int]]
+
+
+class QuantumOptimizeResponse(BaseModel):
+    """Response model for quantum optimization."""
+    optimal_changes: List[int]
+    selected_files: List[str]
+    objective_value: float
+    conflict_risk: int
+    quantum_backend: str
+    num_qubits: int
+
+
 class HealthResponse(BaseModel):
     """Response model for health check."""
     status: str
@@ -96,6 +114,52 @@ watsonx_service: WatsonxService | None = None
 bob_orchestrator: BobOrchestrator | None = None
 streaming_orchestrator: StreamingOrchestrator | None = None
 github_service: GitHubService | None = None
+qope_service: QOPEService | None = None
+
+
+def build_candidate_changes_from_intent(intent: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Build a conservative candidate list when Bob generation needs QOPE internally."""
+    action = intent.get("action", "implement_feature")
+    target_module = intent.get("target_module", "app")
+    safe_action = str(action).replace(" ", "_").replace("-", "_")
+    safe_module = str(target_module).strip("/").replace("\\", "/") or "app"
+
+    return [
+        {"file_path": f"{safe_module}/main.py", "function_name": "main", "coverage_weight": 0.9},
+        {"file_path": f"{safe_module}/__init__.py", "function_name": "__init__", "coverage_weight": 0.3},
+        {"file_path": f"middleware/{safe_action}.py", "function_name": safe_action, "coverage_weight": 1.0},
+        {"file_path": "app.py", "function_name": "configure_app", "coverage_weight": 0.7},
+        {"file_path": "config.py", "function_name": "load_config", "coverage_weight": 0.4},
+        {"file_path": f"routes/{safe_module}_routes.py", "function_name": "register_routes", "coverage_weight": 0.8},
+        {"file_path": f"tests/test_{safe_action}.py", "function_name": f"test_{safe_action}", "coverage_weight": 0.6},
+        {"file_path": "models.py", "function_name": "Base", "coverage_weight": 0.5},
+    ]
+
+
+def build_conflict_matrix(candidate_changes: List[Dict[str, Any]]) -> List[List[int]]:
+    """Mark candidates that touch the same function as conflicting."""
+    count = len(candidate_changes)
+    matrix = [[0 for _ in range(count)] for _ in range(count)]
+
+    for i in range(count):
+        for j in range(i + 1, count):
+            if candidate_changes[i].get("function_name") == candidate_changes[j].get("function_name"):
+                matrix[i][j] = 1
+                matrix[j][i] = 1
+
+    return matrix
+
+
+def get_stored_quantum_result(intent: Dict[str, Any]) -> Dict[str, Any] | None:
+    """Read quantum_result from either the current or legacy Cloudant shape."""
+    if isinstance(intent.get("quantum_result"), dict):
+        return intent["quantum_result"]
+
+    result = intent.get("result")
+    if isinstance(result, dict) and isinstance(result.get("quantum_result"), dict):
+        return result["quantum_result"]
+
+    return None
 
 
 @asynccontextmanager
@@ -105,7 +169,7 @@ async def lifespan(app: FastAPI):
     Initializes services on startup and cleans up on shutdown.
     """
     global stt_service, nlu_service, cloudant_service, watsonx_service
-    global bob_orchestrator, streaming_orchestrator, github_service
+    global bob_orchestrator, streaming_orchestrator, github_service, qope_service
     
     logger.info("Starting PHRAXIS application...")
     
@@ -122,6 +186,7 @@ async def lifespan(app: FastAPI):
         bob_orchestrator = BobOrchestrator()
         streaming_orchestrator = StreamingOrchestrator()
         github_service = GitHubService()
+        qope_service = QOPEService()
         
         logger.info("✓ All services initialized successfully")
         
@@ -281,6 +346,57 @@ async def extract_intent(request: IntentRequest):
         raise HTTPException(status_code=500, detail=f"Intent extraction failed: {str(e)}")
 
 
+@app.post("/api/quantum/optimize", response_model=QuantumOptimizeResponse)
+async def quantum_optimize(request: QuantumOptimizeRequest):
+    """
+    Optimize code change selection using IBM Quantum QAOA.
+    
+    Args:
+        request: Request containing doc_id, candidate_changes, and conflict_matrix
+    
+    Returns:
+        Quantum optimization result with optimal changes
+    """
+    if cloudant_service is None or qope_service is None:
+        raise HTTPException(status_code=503, detail="Services not initialized")
+    
+    try:
+        logger.info(f"Running quantum optimization for intent: {request.doc_id}")
+        logger.info(f"Candidate changes: {len(request.candidate_changes)}")
+        
+        # Run quantum optimization
+        result = qope_service.optimize(
+            candidate_changes=request.candidate_changes,
+            conflict_matrix=request.conflict_matrix
+        )
+        
+        # Update Cloudant document with quantum result
+        cloudant_service.update_intent_status(
+            request.doc_id,
+            "quantum_optimized",
+            {"quantum_result": result}
+        )
+        
+        logger.info(f"Quantum optimization complete: {len(result['optimal_changes'])} changes selected")
+        
+        return QuantumOptimizeResponse(**result)
+        
+    except QOPEServiceError as e:
+        logger.error(f"QOPE service error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    except CloudantServiceError as e:
+        logger.error(f"Cloudant service error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+    except HTTPException:
+        raise
+    
+    except Exception as e:
+        logger.error(f"Unexpected error in quantum_optimize endpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Quantum optimization failed: {str(e)}")
+
+
 @app.get("/api/generate/code")
 async def generate_code(
     intent_doc_id: str,
@@ -297,7 +413,7 @@ async def generate_code(
     Returns:
         SSE stream of progress events
     """
-    if cloudant_service is None or streaming_orchestrator is None:
+    if cloudant_service is None or streaming_orchestrator is None or qope_service is None:
         raise HTTPException(status_code=503, detail="Services not initialized")
     
     if not intent_doc_id or intent_doc_id == "undefined":
@@ -308,6 +424,24 @@ async def generate_code(
         
         # Get intent from Cloudant
         intent = cloudant_service.get_intent(intent_doc_id)
+
+        quantum_result = get_stored_quantum_result(intent)
+        if quantum_result is None:
+            candidate_changes = build_candidate_changes_from_intent(intent)
+            conflict_matrix = build_conflict_matrix(candidate_changes)
+
+            quantum_result = qope_service.optimize(
+                candidate_changes=candidate_changes,
+                conflict_matrix=conflict_matrix
+            )
+            cloudant_service.update_intent_status(
+                intent_doc_id,
+                "quantum_optimized",
+                {"quantum_result": quantum_result}
+            )
+            intent["quantum_result"] = quantum_result
+
+        selected_files = quantum_result.get("selected_files", [])
         
         # Update status to processing
         cloudant_service.update_intent_status(intent_doc_id, "processing")
@@ -319,7 +453,8 @@ async def generate_code(
             try:
                 async for event in streaming_orchestrator.orchestrate_stream(
                     intent=intent,
-                    repo_path=repo_path
+                    repo_path=repo_path,
+                    selected_files=selected_files
                 ):
                     yield event
                 
@@ -489,6 +624,7 @@ async def health_check():
             "cloudant": cloudant_service.health_check() if cloudant_service else False,
             "watsonx": watsonx_service.health_check() if watsonx_service else False,
             "github": github_service.health_check() if github_service else False,
+            "qope": qope_service.health_check() if qope_service else False,
         }
         
         # Overall status is healthy if all services are healthy

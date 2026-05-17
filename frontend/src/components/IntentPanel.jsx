@@ -4,6 +4,14 @@ import './IntentPanel.css';
 
 function IntentPanel({ intent }) {
   const svgRef = useRef(null);
+  const palette = {
+    surface: '#1a1a1d',
+    surfaceAlt: '#232326',
+    line: '#d7d7d7',
+    muted: '#bdbdbd',
+    text: '#0b0b0c',
+    textOnSurface: '#f5f5f5',
+  };
 
   useEffect(() => {
     if (!intent || !svgRef.current) return;
@@ -70,7 +78,7 @@ function IntentPanel({ intent }) {
       .selectAll('line')
       .data(links)
       .join('line')
-      .attr('stroke', d => d.type === 'dashed' ? '#64748b' : '#2563eb')
+      .attr('stroke', d => d.type === 'dashed' ? palette.muted : palette.line)
       .attr('stroke-width', 2)
       .attr('stroke-dasharray', d => d.type === 'dashed' ? '5,5' : 'none')
       .attr('opacity', 0)
@@ -92,18 +100,18 @@ function IntentPanel({ intent }) {
     node.append('circle')
       .attr('r', d => d.type === 'action' ? 50 : 40)
       .attr('fill', d => {
-        if (d.type === 'action') return '#2563eb';
-        if (d.type === 'parameter') return '#0ea5e9';
-        return '#64748b';
+        if (d.type === 'action') return palette.textOnSurface;
+        if (d.type === 'parameter') return '#cfcfcf';
+        return '#9f9f9f';
       })
-      .attr('stroke', '#60a5fa')
+      .attr('stroke', '#ffffff')
       .attr('stroke-width', 2);
 
     // Add labels to nodes
     node.append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', '0.3em')
-      .attr('fill', 'white')
+      .attr('fill', palette.text)
       .attr('font-size', d => d.type === 'action' ? '14px' : '11px')
       .attr('font-weight', d => d.type === 'action' ? 'bold' : 'normal')
       .each(function(d) {
@@ -164,15 +172,15 @@ function IntentPanel({ intent }) {
         .attr('y', -25)
         .attr('width', 120)
         .attr('height', 30)
-        .attr('fill', '#1e293b')
-        .attr('stroke', '#2563eb')
+        .attr('fill', palette.surfaceAlt)
+        .attr('stroke', palette.line)
         .attr('stroke-width', 2)
         .attr('rx', 5);
 
       tooltip.append('text')
         .attr('text-anchor', 'middle')
         .attr('dy', '-0.5em')
-        .attr('fill', 'white')
+        .attr('fill', palette.textOnSurface)
         .attr('font-size', '12px')
         .text(`Confidence: ${(d.confidence * 100).toFixed(1)}%`);
     })
@@ -213,6 +221,7 @@ function IntentPanel({ intent }) {
     return (
       <div className="intent-panel-content">
         <h3 className="panel-title">Intent Structure</h3>
+        <p className="panel-subtitle">IBM Watson Natural Language Understanding extracts action, module, and constraints.</p>
         <div className="empty-state">
           <p>Waiting for intent extraction...</p>
         </div>
@@ -223,6 +232,7 @@ function IntentPanel({ intent }) {
   return (
     <div className="intent-panel-content">
       <h3 className="panel-title">Intent Structure</h3>
+      <p className="panel-subtitle">IBM NLU maps your request into action, module, and confidence data.</p>
       <div className="intent-metadata">
         <div className="metadata-item">
           <span className="metadata-label">Action:</span>

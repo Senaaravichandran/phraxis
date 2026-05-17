@@ -5,7 +5,7 @@ Provides real-time progress updates via Server-Sent Events during code generatio
 import logging
 import asyncio
 import json
-from typing import Dict, Any, AsyncGenerator
+from typing import Dict, Any, AsyncGenerator, List, Optional
 from datetime import datetime
 
 import sys
@@ -30,7 +30,8 @@ class StreamingOrchestrator:
     async def orchestrate_stream(
         self,
         intent: Dict[str, Any],
-        repo_path: str
+        repo_path: str,
+        selected_files: Optional[List[str]] = None
     ) -> AsyncGenerator[str, None]:
         """
         Run orchestration with streaming progress updates.
@@ -59,13 +60,21 @@ class StreamingOrchestrator:
         try:
             resolved_repo_path = self.orchestrator.validate_runtime(repo_path)
 
+            selected_files = selected_files or []
+            if selected_files:
+                intent = {
+                    **intent,
+                    "quantum_selected_files": selected_files
+                }
+
             # Send started event
             yield self._format_sse({
                 "event": "started",
                 "timestamp": datetime.utcnow().isoformat(),
                 "intent": intent,
                 "repo_path": str(resolved_repo_path),
-                "session_id": session_id
+                "session_id": session_id,
+                "selected_files": selected_files
             })
 
             # Run orchestration in executor to avoid blocking
@@ -86,6 +95,7 @@ class StreamingOrchestrator:
                 str(resolved_repo_path),
                 session_id
             )
+            architect_output = self._apply_quantum_file_scope(architect_output, selected_files)
 
             yield self._format_sse({
                 "event": "architect_complete",
@@ -113,6 +123,7 @@ class StreamingOrchestrator:
                 architect_output,
                 session_id
             )
+            plan = self._filter_plan_by_selected_files(plan, selected_files, intent)
 
             yield self._format_sse({
                 "event": "plan_complete",
@@ -274,6 +285,71 @@ class StreamingOrchestrator:
 
         # SSE format: event: type\ndata: json\n\n
         return f"event: {event_type}\ndata: {json_data}\n\n"
+
+    def _apply_quantum_file_scope(
+        self,
+        architect_output: Dict[str, Any],
+        selected_files: List[str]
+    ) -> Dict[str, Any]:
+        """Restrict Architect output to the files selected by QOPE."""
+        if not selected_files:
+            return architect_output
+
+        selected = {self._normalize_path(path) for path in selected_files}
+        scoped_output = dict(architect_output)
+
+        for key in ("files_to_modify", "new_files_to_create"):
+            values = architect_output.get(key, [])
+            if isinstance(values, list):
+                filtered = [
+                    value for value in values
+                    if self._normalize_path(str(value)) in selected
+                ]
+                scoped_output[key] = filtered or selected_files
+
+        functions = architect_output.get("functions_to_change", [])
+        if isinstance(functions, list):
+            scoped_output["functions_to_change"] = [
+                item for item in functions
+                if not isinstance(item, dict)
+                or self._normalize_path(str(item.get("file_path", item.get("file", "")))) in selected
+            ]
+
+        scoped_output["quantum_selected_files"] = selected_files
+        return scoped_output
+
+    def _filter_plan_by_selected_files(
+        self,
+        plan: List[Dict[str, Any]],
+        selected_files: List[str],
+        intent: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """Keep Bob code generation scoped to QOPE-selected files."""
+        if not selected_files:
+            return plan
+
+        selected = {self._normalize_path(path) for path in selected_files}
+        filtered_plan = [
+            step for step in plan
+            if self._normalize_path(str(step.get("file_path", ""))) in selected
+        ]
+
+        if filtered_plan:
+            return filtered_plan
+
+        action = intent.get("action", "implement_feature")
+        return [
+            {
+                "step": index + 1,
+                "file_path": file_path,
+                "operation": "modify",
+                "description": f"Implement {action} in QOPE-selected file {file_path}"
+            }
+            for index, file_path in enumerate(selected_files)
+        ]
+
+    def _normalize_path(self, path: str) -> str:
+        return path.replace("\\", "/").strip().lstrip("./")
 
     def _generate_session_id(self) -> str:
         """Generate a unique session ID."""

@@ -4,19 +4,38 @@
   box-sizing: border-box;
 }
 
+:root {
+  color-scheme: light;
+  --bg-0: #ffffff;
+  --bg-1: #f6f6f6;
+  --bg-2: #ececec;
+  --bg-3: #dedede;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-strong: rgba(250, 250, 250, 0.96);
+  --border: rgba(0, 0, 0, 0.08);
+  --border-soft: rgba(0, 0, 0, 0.06);
+  --text: #111111;
+  --text-muted: #444444;
+  --text-soft: #666666;
+  --accent: #d9d9d9;
+  --accent-strong: #111111;
+  --shadow: rgba(0, 0, 0, 0.08);
+}
+
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #0a0e27;
-  color: #ffffff;
-  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(0, 0, 0, 0.04), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(0, 0, 0, 0.02), transparent 28%),
+    linear-gradient(180deg, #ffffff 0%, #f6f6f6 40%, #ececec 100%);
+  color: var(--text);
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
 }
 
-/* Animated background */
 body::before {
   content: '';
   position: fixed;
@@ -25,28 +44,30 @@ body::before {
   width: 100%;
   height: 100%;
   background:
-    radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(96, 165, 250, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
-  animation: backgroundShift 20s ease-in-out infinite;
+    linear-gradient(135deg, rgba(0, 0, 0, 0.03), transparent 32%),
+    linear-gradient(225deg, rgba(0, 0, 0, 0.02), transparent 36%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.015), transparent 48%);
   pointer-events: none;
   z-index: 0;
 }
 
-@keyframes backgroundShift {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.1); }
-}
-
 code {
-  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
 }
 
 #root {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
   position: relative;
   z-index: 1;
+}
+
+@media (max-width: 1100px) {
+  #root {
+    min-height: 100vh;
+    height: auto;
+  }
 }
 
 /* Made with Bob */

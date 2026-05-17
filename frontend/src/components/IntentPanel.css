@@ -1,60 +1,72 @@
 .intent-panel-content {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  height: 50%;
+  gap: 8px;
+  height: 54%;
+  min-height: 0;
   overflow: hidden;
+}
+
+.panel-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .intent-metadata {
   display: flex;
-  gap: 1.5rem;
-  padding: 0.75rem;
-  background: rgba(15, 23, 42, 0.5);
-  border-radius: 8px;
+  gap: 10px;
+  padding: 11px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .metadata-item {
   display: flex;
-  gap: 0.5rem;
+  gap: 6px;
   align-items: center;
+  min-width: 0;
 }
 
 .metadata-label {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 700;
 }
 
 .metadata-value {
-  font-size: 0.9rem;
-  color: #60a5fa;
-  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text);
+  font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .intent-graph {
   flex: 1;
-  min-height: 200px;
-  background: rgba(15, 23, 42, 0.3);
-  border-radius: 8px;
+  min-height: 150px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .node {
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .node circle {
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.35));
 }
 
 .node:hover circle {
-  filter: drop-shadow(0 6px 12px rgba(37, 99, 235, 0.5));
+  filter: drop-shadow(0 8px 18px rgba(255, 255, 255, 0.24));
 }
 
 .node text {
   pointer-events: none;
   user-select: none;
 }
-
-/* Made with Bob */

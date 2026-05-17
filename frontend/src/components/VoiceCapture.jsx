@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Loader2 } from 'lucide-react';
+import { ArrowRight, Mic, MicOff, Loader2 } from 'lucide-react';
 import './VoiceCapture.css';
 
-function VoiceCapture({ isRecording, setIsRecording, onRecordingComplete, generationStatus }) {
+function VoiceCapture({ isRecording, setIsRecording, onRecordingComplete, generationStatus, onTextSubmit, inputMode }) {
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [textInput, setTextInput] = useState('');
   const [micAvailable, setMicAvailable] = useState(true);
@@ -94,10 +94,11 @@ function VoiceCapture({ isRecording, setIsRecording, onRecordingComplete, genera
 
   const handleTextSubmit = (e) => {
     e.preventDefault();
-    if (textInput.trim()) {
-      // Create a mock audio blob for text input
-      const textBlob = new Blob([textInput], { type: 'text/plain' });
-      onRecordingComplete(textBlob);
+    if (textInput.trim() && textInput.length <= 500) {
+      // Call the text submit handler from parent
+      if (onTextSubmit) {
+        onTextSubmit(textInput.trim());
+      }
       setTextInput('');
     }
   };
@@ -110,66 +111,141 @@ function VoiceCapture({ isRecording, setIsRecording, onRecordingComplete, genera
 
   const getStatusText = () => {
     if (generationStatus === 'transcribing') return 'Transcribing...';
-    if (generationStatus === 'extracting') return 'Extracting intent...';
-    if (generationStatus === 'generating') return 'WatsonX is generating code...';
+    if (generationStatus === 'extracting_intent') return 'Extracting intent...';
+    if (generationStatus === 'quantum_optimizing') return 'Running quantum optimizer...';
+    if (generationStatus === 'generating_code') return 'WatsonX is generating code...';
+    if (generationStatus === 'opening_pr') return 'Opening pull request...';
     if (generationStatus === 'complete') return 'Complete!';
     if (isRecording) return 'Recording...';
     return 'Speak your feature idea';
   };
 
-  const isProcessing = generationStatus !== 'idle' && generationStatus !== 'complete';
+  const isProcessing = !['idle', 'recording', 'complete'].includes(generationStatus);
+  const isChatMode = inputMode === 'chat';
 
   return (
     <div className="voice-capture">
-      <div className="mic-container">
-        <button
-          className={`mic-button ${isRecording ? 'recording' : ''} ${isProcessing ? 'processing' : ''}`}
-          onClick={isRecording ? stopRecording : startRecording}
-          disabled={!micAvailable || isProcessing}
-        >
-          {isProcessing ? (
-            <Loader2 className="mic-icon spinning" size={64} />
-          ) : isRecording ? (
-            <Mic className="mic-icon" size={64} />
-          ) : (
-            <MicOff className="mic-icon" size={64} />
-          )}
-          
-          {isRecording && (
-            <div className="recording-pulse" />
-          )}
-        </button>
-
-        <div className="status-text">
-          {getStatusText()}
-        </div>
-
-        {isRecording && (
-          <div className="recording-duration">
-            {formatDuration(recordingDuration)}
+      {!isChatMode ? (
+        <div className="voice-shell">
+          <div className="section-title">
+            <span>Voice mode</span>
+            <p>Capture spoken requests with IBM Watson Speech to Text.</p>
           </div>
-        )}
-      </div>
 
-      {!micAvailable && (
-        <div className="text-input-fallback">
-          <p className="fallback-message">Microphone not available. Type your request:</p>
-          <form onSubmit={handleTextSubmit}>
-            <input
-              type="text"
+          <div className="mic-container">
+          <button
+            className={`mic-button ${isRecording ? 'recording' : ''} ${isProcessing ? 'processing' : ''}`}
+            onClick={isRecording ? stopRecording : startRecording}
+            disabled={!micAvailable || isProcessing}
+          >
+            {isProcessing ? (
+              <Loader2 className="mic-icon spinning" size={92} />
+            ) : isRecording ? (
+              <Mic className="mic-icon" size={92} />
+            ) : (
+              <MicOff className="mic-icon" size={92} />
+            )}
+
+            {isRecording && <div className="recording-pulse" />}
+          </button>
+
+          <div className="status-text">
+            {getStatusText()}
+          </div>
+
+          {isRecording && (
+            <div className="recording-duration">
+              {formatDuration(recordingDuration)}
+            </div>
+          )}
+
+          {!micAvailable && (
+            <div className="text-input-fallback">
+              <p className="fallback-message">Microphone not available. Type your request:</p>
+              <form onSubmit={handleTextSubmit}>
+                <input
+                  type="text"
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder="e.g., Add authentication to the login endpoint"
+                  className="text-input"
+                  disabled={isProcessing}
+                />
+                <button
+                  type="submit"
+                  className="submit-button"
+                  disabled={!textInput.trim() || isProcessing}
+                >
+                  Submit
+                </button>
+              </form>
+            </div>
+          )}
+          </div>
+
+          <div className="chat-under-voice">
+            <div className="divider">
+              <span className="divider-text">Type a command</span>
+            </div>
+            <form onSubmit={handleTextSubmit} className="text-form">
+              <textarea
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Type the same request you would say aloud..."
+                className="text-textarea"
+                rows={4}
+                maxLength={500}
+                disabled={isProcessing}
+              />
+              <div className="text-form-footer">
+                <span className="char-count">
+                  {textInput.length}/500 characters
+                </span>
+                <button 
+                  type="submit" 
+                  className="submit-button-primary"
+                  disabled={!textInput.trim() || isProcessing}
+                >
+                  Send Command
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : (
+        <div className="text-input-section chat-shell">
+          <div className="section-title">
+            <span>Chat mode</span>
+            <p>Type the feature request and send it straight into WatsonX.</p>
+          </div>
+
+          <div className="divider">
+            <span className="divider-text">chat input</span>
+          </div>
+          <form onSubmit={handleTextSubmit} className="text-form">
+            <textarea
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              placeholder="e.g., Add authentication to the login endpoint"
-              className="text-input"
+              placeholder="Describe the feature you want to implement..."
+              className="text-textarea"
+              rows={4}
+              maxLength={500}
               disabled={isProcessing}
             />
-            <button 
-              type="submit" 
-              className="submit-button"
-              disabled={!textInput.trim() || isProcessing}
-            >
-              Submit
-            </button>
+            <div className="text-form-footer">
+              <span className="char-count">
+                {textInput.length}/500 characters
+              </span>
+              <button 
+                type="submit" 
+                className="submit-button-primary"
+                disabled={!textInput.trim() || isProcessing}
+              >
+                Send Chat Request
+                <ArrowRight size={16} />
+              </button>
+            </div>
           </form>
         </div>
       )}
@@ -189,3 +265,4 @@ function VoiceCapture({ isRecording, setIsRecording, onRecordingComplete, genera
 export default VoiceCapture;
 
 // Made with Bob
+

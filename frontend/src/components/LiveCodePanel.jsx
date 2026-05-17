@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Check, ClipboardList, Code2, FileText, Hammer, BookOpen, Zap } from 'lucide-react';
 import './LiveCodePanel.css';
 
 function LiveCodePanel({ liveProgress, generationStatus }) {
@@ -34,10 +35,17 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
   const isPlanActive = planEvents.length > 0 && !planEvents.some(e => getType(e) === 'plan_complete');
   const isCodeActive = codeEvents.length > 0 && !codeEvents.some(e => getType(e) === 'code_complete');
 
-  if (generationStatus === 'idle' || generationStatus === 'transcribing' || generationStatus === 'extracting') {
+  if (
+    generationStatus === 'idle' ||
+    generationStatus === 'recording' ||
+    generationStatus === 'transcribing' ||
+    generationStatus === 'extracting_intent' ||
+    generationStatus === 'quantum_optimizing'
+  ) {
     return (
       <div className="live-code-panel">
         <h3 className="panel-title">WatsonX Workspace</h3>
+        <p className="panel-subtitle">IBM watsonx.ai generates the implementation plan and code steps.</p>
         <div className="empty-state">
           <p>Waiting for code generation to start...</p>
         </div>
@@ -48,11 +56,12 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
   return (
     <div className="live-code-panel">
       <h3 className="panel-title">Bob's Workspace</h3>
+      <p className="panel-subtitle">IBM watsonx.ai streams the architect, plan, and code stages below.</p>
 
       {/* Architect Section */}
       <div className={`workspace-section ${isArchitectActive ? 'active' : ''}`}>
         <div className="section-header">
-          <span className="section-icon">🏗️</span>
+          <Hammer size={18} className="section-icon" />
           <h4>Architect Mode</h4>
           {isArchitectActive && <span className="status-badge active">Active</span>}
           {architectEvents.some(e => getType(e) === 'architect_complete') && (
@@ -66,11 +75,11 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
             architectEvents.map((event, index) => (
               <div key={index} className="progress-item animate-in">
                 {getType(event) === 'architect_started' && (
-                  <p className="info-text">📖 Reading repository structure...</p>
+                  <p className="info-text icon-line"><BookOpen size={15} /> Reading repository structure...</p>
                 )}
                 {getType(event) === 'architect_complete' && event.result && (
                   <>
-                    <p className="success-text">✓ Repository analysis complete</p>
+                    <p className="success-text icon-line"><Check size={15} /> Repository analysis complete</p>
                     {event.result.files_to_modify && (
                       <div className="file-list">
                         <p className="list-title">Files to modify:</p>
@@ -91,7 +100,7 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
       {/* Plan Section */}
       <div className={`workspace-section ${isPlanActive ? 'active' : ''}`}>
         <div className="section-header">
-          <span className="section-icon">📋</span>
+          <ClipboardList size={18} className="section-icon" />
           <h4>Plan Mode</h4>
           {isPlanActive && <span className="status-badge active">Active</span>}
           {planEvents.some(e => getType(e) === 'plan_complete') && (
@@ -145,7 +154,7 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
       {/* Code Section */}
       <div className={`workspace-section ${isCodeActive ? 'active' : ''}`}>
         <div className="section-header">
-          <span className="section-icon">💻</span>
+          <Code2 size={18} className="section-icon" />
           <h4>Code Mode</h4>
           {isCodeActive && <span className="status-badge active">Active</span>}
           {codeEvents.some(e => getType(e) === 'code_complete') && (
@@ -159,16 +168,19 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
             codeEvents.map((event, index) => (
               <div key={index} className="progress-item animate-in">
                 {getType(event) === 'code_started' && (
-                  <p className="info-text">⚡ Generating code...</p>
+                  <p className="info-text icon-line"><Zap size={15} /> Generating code...</p>
                 )}
                 {getType(event) === 'code_step' && (
                   <div className="code-step">
-                    <p className="file-path">📄 {event.file || event.data?.file_path || 'Working...'}</p>
+                    <p className="file-path icon-line">
+                      <FileText size={15} />
+                      {event.file || event.data?.file_path || 'Working...'}
+                    </p>
                     {event.content && (
                       <pre className="code-block">
                         <code>{event.content}</code>
                         {isCodeActive && index === codeEvents.length - 1 && (
-                          <span className="cursor-blink">█</span>
+                          <span className="cursor-blink">|</span>
                         )}
                       </pre>
                     )}
@@ -178,7 +190,7 @@ function LiveCodePanel({ liveProgress, generationStatus }) {
                   <p className="info-text">Error: {event.message}</p>
                 )}
                 {getType(event) === 'code_complete' && (
-                  <p className="success-text">✓ Code generation complete!</p>
+                  <p className="success-text icon-line"><Check size={15} /> Code generation complete!</p>
                 )}
                 {event.message && !event.content && (
                   <p className="info-text">{event.message}</p>

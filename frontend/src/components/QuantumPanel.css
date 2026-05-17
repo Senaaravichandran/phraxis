@@ -1,0 +1,270 @@
+.quantum-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 14px;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.quantum-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.28));
+}
+
+.quantum-panel.idle {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.quantum-panel.running {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 28px rgba(255, 255, 255, 0.06);
+}
+
+.quantum-panel.complete {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+}
+
+.quantum-panel .panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.quantum-panel .panel-title svg {
+  color: var(--text);
+}
+
+.quantum-panel .panel-title .pulse {
+  animation: pulse-icon 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.08); }
+}
+
+.panel-subtitle {
+  margin: -2px 0 12px 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.4;
+  max-width: 36ch;
+}
+
+.panel-subtitle-light {
+  color: var(--text-muted);
+}
+
+.quantum-idle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 12px;
+  text-align: center;
+}
+
+.quantum-icon-large {
+  color: var(--text-muted);
+  opacity: 0.9;
+}
+
+.quantum-panel .status-text {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.quantum-running {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+.quantum-circuit {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px;
+  min-height: 0;
+}
+
+.quantum-circuit svg {
+  display: block;
+  height: clamp(132px, 16vh, 178px);
+}
+
+.quantum-gate {
+  fill: #f4f4f4;
+  stroke: #0b0b0c;
+  stroke-width: 2;
+  animation: gate-travel 2.2s linear infinite;
+}
+
+@keyframes gate-travel {
+  0% { transform: translateX(0); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateX(336px); opacity: 0; }
+}
+
+.quantum-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.pulse-indicator {
+  width: 10px;
+  height: 10px;
+  background: var(--text);
+  border-radius: 50%;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.45; }
+}
+
+.status-text-large {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+}
+
+.status-subtext {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.status-detail {
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  margin: 0;
+  font-family: 'Courier New', monospace;
+}
+
+.quantum-complete {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.result-icon,
+.success-icon,
+.file-check {
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.result-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-title {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 4px 0;
+}
+
+.result-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  overflow-wrap: anywhere;
+}
+
+.selected-files {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.quantum-panel .file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+}
+
+.quantum-panel .file-path {
+  color: var(--text);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.complexity-comparison {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.complexity-line {
+  font-size: 0.78rem;
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  font-weight: 800;
+  margin: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.quantum-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}

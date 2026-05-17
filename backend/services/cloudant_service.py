@@ -214,7 +214,7 @@ class CloudantService:
         Raises:
             CloudantServiceError: If update fails
         """
-        valid_statuses = ["pending", "processing", "complete", "error"]
+        valid_statuses = ["pending", "processing", "quantum_optimized", "complete", "error"]
         if status not in valid_statuses:
             raise CloudantServiceError(f"Invalid status: {status}. Must be one of {valid_statuses}")
         
@@ -229,6 +229,7 @@ class CloudantService:
             doc['updated_at'] = datetime.utcnow().isoformat()
             
             if result:
+                doc.update(result)
                 doc['result'] = result
             
             # Save updated document - wrap dict in Document object

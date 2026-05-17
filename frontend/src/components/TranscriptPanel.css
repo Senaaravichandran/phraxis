@@ -1,49 +1,62 @@
 .transcript-panel-content {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  height: 50%;
+  gap: 8px;
+  height: 46%;
+  min-height: 0;
   overflow-y: auto;
 }
 
 .panel-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #60a5fa;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--text);
   margin: 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid rgba(37, 99, 235, 0.3);
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  letter-spacing: 0;
+}
+
+.panel-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .empty-state {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 120px;
   height: 100%;
-  color: #64748b;
-  font-style: italic;
+  color: var(--text-soft);
+  font-style: normal;
+  text-align: center;
 }
 
 .transcript-text {
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1.6;
-  color: #e2e8f0;
-  padding: 1rem;
-  background: rgba(15, 23, 42, 0.5);
-  border-radius: 8px;
-  min-height: 80px;
+  color: var(--text);
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  min-height: 74px;
+  overflow-wrap: anywhere;
 }
 
 .transcript-text .keyword {
-  color: #60a5fa;
-  font-weight: 600;
-  background: rgba(37, 99, 235, 0.2);
-  padding: 0.1rem 0.3rem;
-  border-radius: 3px;
+  color: #ffffff;
+  font-weight: 800;
+  background: #000000;
+  padding: 1px 6px;
+  border-radius: 4px;
 }
 
 .cursor-blink {
-  color: #2563eb;
+  color: var(--accent-strong);
   font-weight: bold;
   animation: blink 1s step-end infinite;
 }
@@ -53,65 +66,59 @@
   51%, 100% { opacity: 0; }
 }
 
-.confidence-section {
+.confidence-section,
+.keywords-section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .confidence-label {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
-  color: #94a3b8;
+  gap: 12px;
+  font-size: 0.84rem;
+  color: var(--text-muted);
 }
 
 .confidence-value {
-  font-weight: 700;
-  color: #60a5fa;
-  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+  font-size: 0.9rem;
 }
 
 .confidence-bar {
-  height: 8px;
-  background: rgba(30, 41, 59, 0.8);
-  border-radius: 4px;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
   overflow: hidden;
 }
 
 .confidence-fill {
   height: 100%;
   transition: width 0.5s ease;
-  border-radius: 4px;
-}
-
-.keywords-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  border-radius: 999px;
 }
 
 .keywords-label {
-  font-size: 0.9rem;
-  color: #94a3b8;
+  font-size: 0.84rem;
+  color: var(--text-muted);
   margin: 0;
 }
 
 .keywords-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 6px;
 }
 
 .keyword-tag {
-  padding: 0.25rem 0.75rem;
-  background: rgba(37, 99, 235, 0.2);
-  border: 1px solid rgba(37, 99, 235, 0.4);
-  border-radius: 12px;
-  font-size: 0.85rem;
-  color: #60a5fa;
-  font-weight: 500;
+  padding: 4px 9px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: var(--text);
+  font-weight: 700;
 }
-
-/* Made with Bob */

@@ -1,178 +1,273 @@
 .app {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  max-width: 1920px;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+  background:
+    radial-gradient(circle at 15% 10%, rgba(0, 0, 0, 0.05), transparent 24%),
+    radial-gradient(circle at 85% 12%, rgba(0, 0, 0, 0.03), transparent 20%),
+    linear-gradient(180deg, #ffffff 0%, #f6f6f6 48%, #ececec 100%);
+  color: #111111;
   position: relative;
+  padding: clamp(8px, 0.8vw, 12px);
+  gap: clamp(8px, 0.8vw, 10px);
+  margin: 0 auto;
+}
+
+.app::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-size: 72px 72px;
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+.app > * {
+  position: relative;
+  z-index: 1;
 }
 
 .app-header {
-  padding: 1.5rem 2rem;
-  background: rgba(15, 23, 42, 0.8);
-  border-bottom: 2px solid transparent;
-  border-image: linear-gradient(90deg, #2563eb, #60a5fa, #2563eb) 1;
+  min-height: 64px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 4px 24px rgba(37, 99, 235, 0.15);
-  position: relative;
-  z-index: 10;
-}
-
-.app-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #60a5fa, transparent);
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
+  gap: 20px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(12px);
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 10px;
+  min-width: 0;
 }
 
 .logo-icon {
-  font-size: 2rem;
-  animation: pulse 2s ease-in-out infinite;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #111111, #4b4b4b);
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 16px 36px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+.header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .logo h1 {
-  font-size: 2.2rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #2563eb, #60a5fa, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 30px rgba(37, 99, 235, 0.3);
+  font-size: clamp(1.2rem, 1.5vw, 1.75rem);
+  font-weight: 700;
+  color: #111111;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  margin: 0;
 }
 
-.tagline {
-  color: #94a3b8;
-  font-size: 0.95rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
+.header-subtitle {
+  color: #555555;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  background: linear-gradient(90deg, #94a3b8, #cbd5e1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  margin: 0;
+}
+
+.header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
+}
+
+.meta-label {
+  font-size: 0.72rem;
+  color: #666666;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.meta-value {
+  font-size: 1rem;
+  color: #111111;
+  font-weight: 700;
 }
 
 .dashboard {
   flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 1.5rem;
-  padding: 1.5rem;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "voice voice voice transcript transcript transcript quantum quantum quantum pr pr pr"
+    "voice voice voice code code code code code code pr pr pr";
+  gap: 8px;
   overflow: hidden;
 }
 
 .panel {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(37, 99, 235, 0.3);
-  border-radius: 16px;
-  padding: 1.5rem;
+  min-width: 0;
+  min-height: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  padding: 10px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(20px);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
   position: relative;
 }
 
 .panel::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #2563eb, transparent);
-  opacity: 0;
-  transition: opacity 0.4s ease;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), transparent 85%);
+  opacity: 0.4;
 }
 
-.panel:hover {
-  border-color: rgba(37, 99, 235, 0.7);
-  box-shadow:
-    0 16px 64px rgba(37, 99, 235, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+.voice-panel,
+.transcript-panel,
+.quantum-panel-shell,
+.code-panel,
+.pr-panel {
+  min-height: 0;
 }
 
-.panel:hover::before {
-  opacity: 1;
+.voice-panel,
+.transcript-panel,
+.quantum-panel-shell,
+.code-panel,
+.pr-panel {
+  height: 100%;
 }
 
 .voice-panel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  grid-area: voice;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: 8px;
+  overflow: auto;
 }
 
 .transcript-panel {
-  gap: 1rem;
+  grid-area: transcript;
+  gap: 12px;
+}
+
+.quantum-panel-shell {
+  grid-area: quantum;
+  padding: 0;
 }
 
 .code-panel {
-  overflow-y: auto;
+  grid-area: code;
 }
 
 .pr-panel {
-  overflow-y: auto;
+  grid-area: pr;
 }
 
-/* Scrollbar styling */
+.code-panel,
+.pr-panel,
+.transcript-panel {
+  overflow: hidden;
+}
+
 .code-panel::-webkit-scrollbar,
-.pr-panel::-webkit-scrollbar {
+.pr-panel::-webkit-scrollbar,
+.panel *::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 .code-panel::-webkit-scrollbar-track,
-.pr-panel::-webkit-scrollbar-track {
-  background: rgba(30, 41, 59, 0.5);
-  border-radius: 4px;
+.pr-panel::-webkit-scrollbar-track,
+.panel *::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .code-panel::-webkit-scrollbar-thumb,
-.pr-panel::-webkit-scrollbar-thumb {
-  background: rgba(37, 99, 235, 0.5);
-  border-radius: 4px;
+.pr-panel::-webkit-scrollbar-thumb,
+.panel *::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 999px;
 }
 
-.code-panel::-webkit-scrollbar-thumb:hover,
-.pr-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(37, 99, 235, 0.7);
-}
-
-/* Responsive design */
-@media (max-width: 1200px) {
+@media (max-width: 1380px) {
   .dashboard {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      "voice voice voice voice transcript transcript transcript quantum quantum quantum"
+      "voice voice voice voice code code code code pr pr pr";
   }
 }
 
-/* Made with Bob */
+@media (max-width: 1100px) {
+  .app {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .app-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-meta {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .dashboard {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-template-areas:
+      "voice"
+      "transcript"
+      "quantum"
+      "code"
+      "pr";
+    overflow: visible;
+  }
+
+  .panel {
+    min-height: 280px;
+  }
+
+  .code-panel,
+  .pr-panel {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 640px) {
+  .app {
+    padding: 12px;
+  }
+
+  .panel {
+    padding: 12px;
+    min-height: 280px;
+  }
+}
