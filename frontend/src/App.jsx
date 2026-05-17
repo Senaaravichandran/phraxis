@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { Theme } from '@carbon/react';
@@ -26,6 +26,7 @@ const formatStatusLabel = (value, fallback) => {
 
 function App() {
   const [isRecording, setIsRecording] = useState(false);
+  const [showNotice, setShowNotice] = useState(true);
   const [transcript, setTranscript] = useState('');
   const [transcriptConfidence, setTranscriptConfidence] = useState(0);
   const [transcriptWords, setTranscriptWords] = useState([]);
@@ -54,6 +55,10 @@ function App() {
     'Ready'
   );
   const quantumStatusLabel = formatStatusLabel(quantumStatus, 'Standby');
+
+  useEffect(() => {
+    setShowNotice(true);
+  }, []);
 
   const handleRecordingStateChange = (recording) => {
     setIsRecording(recording);
@@ -292,7 +297,6 @@ function App() {
         if (settled) {
           return;
         }
-
         console.error('SSE error:', error);
         eventSource.close();
         toast.error('Connection lost', { id: 'generate' });
@@ -344,6 +348,22 @@ function App() {
             }
           }}
         />
+
+        {showNotice && (
+          <div className="notice-backdrop" role="presentation">
+            <div className="notice-modal" role="dialog" aria-modal="true" aria-labelledby="site-notice-title">
+              <p className="notice-kicker">Important notice</p>
+              <h2 id="site-notice-title">Website availability warning</h2>
+              <p className="notice-copy">
+                The website will not work after a few days due to cloud account deactivation by IBM.
+                If its deactivated all our services and experince will be down.
+              </p>
+              <button type="button" className="notice-button" onClick={() => setShowNotice(false)}>
+                I understand
+              </button>
+            </div>
+          </div>
+        )}
         
         <header className="app-header">
           <div className="logo">
