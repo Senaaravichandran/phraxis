@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./PHRAXIS.png" alt="PHRAXIS — voice-to-code workspace" width="860" />
+<img src="./docs/assets/phraxis-hero.svg" alt="PHRAXIS — animated voice-to-pull-request pipeline" width="100%" />
 
 # PHRAXIS
 

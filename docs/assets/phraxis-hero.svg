@@ -1,0 +1,185 @@
+<svg width="1200" height="480" viewBox="0 0 1200 480" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">PHRAXIS — from voice to pull request</title>
+  <desc id="desc">An animated voice waveform flows through intent, quantum planning, code generation, and into a pull request.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="70" y1="20" x2="1130" y2="460" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#070A12"/>
+      <stop offset="0.52" stop-color="#0C1325"/>
+      <stop offset="1" stop-color="#080A12"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="100" y1="130" x2="720" y2="350" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#55D6FF"/>
+      <stop offset="0.48" stop-color="#5B7CFF"/>
+      <stop offset="1" stop-color="#A855F7"/>
+    </linearGradient>
+    <linearGradient id="signal" x1="655" y1="280" x2="1094" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#55D6FF"/>
+      <stop offset="0.52" stop-color="#7C6CFF"/>
+      <stop offset="1" stop-color="#C45CFF"/>
+    </linearGradient>
+    <radialGradient id="glowBlue">
+      <stop stop-color="#2E7BFF" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#2E7BFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowPurple">
+      <stop stop-color="#A855F7" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#A855F7" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" stroke="#8CA0C8" stroke-opacity="0.075"/>
+    </pattern>
+    <filter id="softGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <clipPath id="frame"><rect x="12" y="12" width="1176" height="456" rx="30"/></clipPath>
+  </defs>
+
+  <style>
+    .signal { stroke-dasharray: 9 13; animation: signal-flow 1.3s linear infinite; }
+    .wave-1 { animation: wave 1.1s ease-in-out infinite; transform-origin: center; }
+    .wave-2 { animation: wave 1.1s ease-in-out -.2s infinite; transform-origin: center; }
+    .wave-3 { animation: wave 1.1s ease-in-out -.4s infinite; transform-origin: center; }
+    .wave-4 { animation: wave 1.1s ease-in-out -.6s infinite; transform-origin: center; }
+    .wave-5 { animation: wave 1.1s ease-in-out -.8s infinite; transform-origin: center; }
+    .orbit { animation: orbit 7s linear infinite; transform-origin: 868px 281px; }
+    .pulse { animation: pulse 2.4s ease-in-out infinite; transform-origin: center; }
+    .cursor { animation: blink 1s steps(2, jump-none) infinite; }
+    .chip { animation: float 4s ease-in-out infinite; }
+    .chip-delay { animation-delay: -2s; }
+    @keyframes signal-flow { to { stroke-dashoffset: -44; } }
+    @keyframes wave { 0%,100% { transform: scaleY(.45); opacity:.65; } 50% { transform: scaleY(1); opacity:1; } }
+    @keyframes orbit { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%,100% { transform: scale(.94); opacity:.45; } 50% { transform: scale(1.08); opacity:.9; } }
+    @keyframes blink { 50% { opacity:0; } }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    @media (prefers-reduced-motion: reduce) {
+      .signal,.wave-1,.wave-2,.wave-3,.wave-4,.wave-5,.orbit,.pulse,.cursor,.chip { animation: none; }
+    }
+  </style>
+
+  <g clip-path="url(#frame)">
+    <rect x="12" y="12" width="1176" height="456" rx="30" fill="url(#bg)"/>
+    <rect x="12" y="12" width="1176" height="456" rx="30" fill="url(#grid)"/>
+    <circle cx="250" cy="20" r="310" fill="url(#glowBlue)"/>
+    <circle cx="1065" cy="430" r="330" fill="url(#glowPurple)"/>
+    <path d="M12 370C236 287 360 476 590 389C810 305 967 420 1188 317V468H12V370Z" fill="#5876FF" fill-opacity="0.035"/>
+    <path d="M12 401C208 328 406 485 590 410C816 319 968 452 1188 356" stroke="#778CFF" stroke-opacity="0.09"/>
+
+    <g font-family="Inter,Segoe UI,Arial,sans-serif">
+      <g transform="translate(78 58)">
+        <rect width="274" height="34" rx="17" fill="#111B31" stroke="#253B63"/>
+        <circle cx="18" cy="17" r="5" fill="#5EE8B1" filter="url(#softGlow)"/>
+        <text x="32" y="22" fill="#AFC1E6" font-size="12" font-weight="650" letter-spacing="1.6">VOICE → INTENT → IMPACT</text>
+      </g>
+
+      <text x="74" y="206" fill="url(#brand)" font-size="100" font-weight="800" letter-spacing="8">PHRAXIS</text>
+      <text x="80" y="248" fill="#F4F7FF" font-size="24" font-weight="650" letter-spacing="0.4">Say the feature. Ship the pull request.</text>
+      <text x="80" y="285" fill="#8FA1C5" font-size="16">A repository-aware voice-to-code workspace powered by IBM.</text>
+
+      <g transform="translate(80 323)">
+        <rect width="118" height="34" rx="10" fill="#111A2D" stroke="#293A5C"/>
+        <path d="M17 11V23M22 8V26M27 13V21M32 10V24" stroke="#56D6FF" stroke-width="2.4" stroke-linecap="round"/>
+        <text x="44" y="22" fill="#C7D4EF" font-size="12" font-weight="650">WATSON</text>
+      </g>
+      <g transform="translate(212 323)">
+        <rect width="106" height="34" rx="10" fill="#111A2D" stroke="#293A5C"/>
+        <circle cx="19" cy="17" r="7" stroke="#8A7DFF" stroke-width="1.5"/>
+        <circle cx="19" cy="17" r="2" fill="#8A7DFF"/>
+        <text x="35" y="22" fill="#C7D4EF" font-size="12" font-weight="650">QISKIT</text>
+      </g>
+      <g transform="translate(332 323)">
+        <rect width="92" height="34" rx="10" fill="#111A2D" stroke="#293A5C"/>
+        <path d="M15 12H25V22H15ZM18 9V12M22 9V12M18 22V25M22 22V25" stroke="#B86BFF" stroke-width="1.6"/>
+        <text x="36" y="22" fill="#C7D4EF" font-size="12" font-weight="650">BOB</text>
+      </g>
+
+      <text x="80" y="414" fill="#607194" font-size="11" font-weight="600" letter-spacing="2">IBM BOB DEV DAY · 2026</text>
+    </g>
+
+    <g filter="url(#shadow)">
+      <rect x="620" y="100" width="500" height="285" rx="26" fill="#0B1120" stroke="#293656"/>
+      <path d="M621 153H1119" stroke="#26334E"/>
+      <circle cx="648" cy="127" r="5" fill="#FF6577"/>
+      <circle cx="667" cy="127" r="5" fill="#FFC65C"/>
+      <circle cx="686" cy="127" r="5" fill="#5EE8B1"/>
+      <rect x="934" y="116" width="158" height="23" rx="11.5" fill="#101A2E" stroke="#28395C"/>
+      <circle cx="951" cy="127.5" r="4" fill="#5EE8B1" class="pulse"/>
+      <text x="964" y="132" fill="#8FA1C5" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="10" font-weight="650" letter-spacing="1">PIPELINE LIVE</text>
+    </g>
+
+    <g>
+      <path class="signal" d="M669 281H1071" stroke="url(#signal)" stroke-width="2" stroke-linecap="round"/>
+
+      <g transform="translate(672 281)">
+        <circle r="37" fill="#0D1930" stroke="#285474"/>
+        <circle r="27" fill="#0B1324"/>
+        <g stroke="#55D6FF" stroke-width="3.5" stroke-linecap="round">
+          <path class="wave-1" d="M-14 -7V7"/><path class="wave-2" d="M-7 -13V13"/>
+          <path class="wave-3" d="M0 -18V18"/><path class="wave-4" d="M7 -11V11"/>
+          <path class="wave-5" d="M14 -6V6"/>
+        </g>
+        <text x="0" y="58" fill="#8FA1C5" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="10" font-weight="650">VOICE</text>
+      </g>
+
+      <g transform="translate(770 281)">
+        <circle r="37" fill="#11172E" stroke="#3D407C"/>
+        <path d="M-15 -13H15M-15 -3H8M-15 7H13M-15 17H3" stroke="#7E80FF" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="17" cy="7" r="3" fill="#7E80FF"/>
+        <text x="0" y="58" fill="#8FA1C5" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="10" font-weight="650">INTENT</text>
+      </g>
+
+      <g transform="translate(868 281)">
+        <circle r="37" fill="#15142D" stroke="#58438C"/>
+        <g class="orbit">
+          <ellipse rx="23" ry="9" stroke="#A274FF" stroke-width="1.8"/>
+          <ellipse rx="23" ry="9" transform="rotate(60)" stroke="#8A73FF" stroke-width="1.8"/>
+          <ellipse rx="23" ry="9" transform="rotate(120)" stroke="#BD68FF" stroke-width="1.8"/>
+          <circle cx="22" cy="0" r="3" fill="#D79CFF"/>
+        </g>
+        <circle r="4" fill="#F0D7FF" filter="url(#softGlow)"/>
+        <text x="0" y="58" fill="#8FA1C5" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="10" font-weight="650">QOPE</text>
+      </g>
+
+      <g transform="translate(966 281)">
+        <circle r="37" fill="#17132B" stroke="#624083"/>
+        <path d="M-15 -13L-27 0L-15 13M15 -13L27 0L15 13M7 -20L-7 20" stroke="#B76AFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="0" y="58" fill="#8FA1C5" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="10" font-weight="650">BUILD</text>
+      </g>
+
+      <g transform="translate(1064 281)">
+        <circle r="37" fill="#191229" stroke="#743C83"/>
+        <path d="M-15 -15H14L21 -8V16H-15V-15Z" stroke="#D167FF" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M14 -15V-8H21M-7 -3H10M-7 5H10" stroke="#D167FF" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="22" cy="-20" r="6" fill="#5EE8B1" stroke="#0B1120" stroke-width="3"/>
+        <text x="0" y="58" fill="#8FA1C5" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="10" font-weight="650">PULL REQUEST</text>
+      </g>
+    </g>
+
+    <g transform="translate(641 177)">
+      <g class="chip">
+        <rect width="140" height="34" rx="12" fill="#101A2E" stroke="#2B4770"/>
+        <circle cx="18" cy="17" r="4" fill="#55D6FF"/>
+        <text x="31" y="22" fill="#AFC1E6" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="11">transcript 94%</text>
+      </g>
+    </g>
+    <g transform="translate(938 177)">
+      <g class="chip chip-delay">
+        <rect width="157" height="34" rx="12" fill="#17142D" stroke="#563F80"/>
+        <circle cx="18" cy="17" r="4" fill="#B86BFF"/>
+        <text x="31" y="22" fill="#C9B8E8" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="11">conflict risk · 0</text>
+      </g>
+    </g>
+
+    <text x="646" y="363" fill="#536584" font-family="IBM Plex Mono,Consolas,monospace" font-size="11">feature/rate-limiting</text>
+    <text x="807" y="363" fill="#8EA1C3" font-family="IBM Plex Mono,Consolas,monospace" font-size="11">3 files changed</text>
+    <text x="1029" y="363" fill="#5EE8B1" font-family="IBM Plex Mono,Consolas,monospace" font-size="11">PR #42</text>
+    <rect class="cursor" x="1090" y="353" width="2" height="12" rx="1" fill="#5EE8B1"/>
+  </g>
+
+  <rect x="12.5" y="12.5" width="1175" height="455" rx="29.5" stroke="url(#brand)" stroke-opacity="0.35"/>
+</svg>
