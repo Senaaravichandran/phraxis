@@ -1,0 +1,132 @@
+<svg width="1200" height="650" viewBox="0 0 1200 650" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">PHRAXIS system architecture</title>
+  <desc id="desc">The React dashboard calls a FastAPI orchestrator connected to IBM Watson, Cloudant, QOPE, watsonx, and GitHub.</desc>
+  <defs>
+    <linearGradient id="bg" x1="70" y1="50" x2="1120" y2="610" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#080C17"/><stop offset=".55" stop-color="#0C1425"/><stop offset="1" stop-color="#090B14"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#45D5FF"/><stop offset="1" stop-color="#5C78FF"/></linearGradient>
+    <linearGradient id="violet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7B72FF"/><stop offset="1" stop-color="#C35BFF"/></linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5EE8B1"/><stop offset="1" stop-color="#25BFA2"/></linearGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" stroke="#91A5CA" stroke-opacity=".06"/></pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#000" flood-opacity=".35"/></filter>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#5B86FF"/></marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#54DDB0"/></marker>
+  </defs>
+  <style>
+    .flow { stroke-dasharray:8 10; animation:flow 1.2s linear infinite; }
+    .flow-back { stroke-dasharray:5 9; animation:flow-back 1.2s linear infinite; }
+    .pulse { animation:pulse 2.2s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+    @keyframes flow { to { stroke-dashoffset:-36; } }
+    @keyframes flow-back { to { stroke-dashoffset:28; } }
+    @keyframes pulse { 0%,100% { opacity:.45; transform:scale(.8); } 50% { opacity:1; transform:scale(1.15); } }
+    @media (prefers-reduced-motion:reduce) { .flow,.flow-back,.pulse { animation:none; } }
+  </style>
+
+  <rect x="12" y="12" width="1176" height="626" rx="30" fill="url(#bg)"/>
+  <rect x="12" y="12" width="1176" height="626" rx="30" fill="url(#grid)"/>
+  <rect x="12.5" y="12.5" width="1175" height="625" rx="29.5" stroke="#5C78FF" stroke-opacity=".28"/>
+
+  <g font-family="Inter,Segoe UI,Arial,sans-serif">
+    <text x="56" y="67" fill="#F1F5FF" font-size="24" font-weight="750">System architecture</text>
+    <text x="56" y="94" fill="#7F91B5" font-size="13">A visible, event-driven path from developer input to a reviewable GitHub change.</text>
+    <g transform="translate(1016 54)"><circle cx="0" cy="0" r="5" fill="#5EE8B1" class="pulse"/><text x="14" y="4" fill="#8194B7" font-size="11" font-weight="650" letter-spacing="1.2">RUNTIME</text></g>
+
+    <rect x="45" y="126" width="244" height="410" rx="22" fill="#0B1426" stroke="#244365" filter="url(#shadow)"/>
+    <text x="69" y="157" fill="#55D6FF" font-size="10" font-weight="700" letter-spacing="1.8">EXPERIENCE</text>
+    <rect x="67" y="181" width="200" height="150" rx="18" fill="#0D192D" stroke="#2D5479"/>
+    <circle cx="92" cy="207" r="6" fill="#55D6FF"/>
+    <text x="109" y="212" fill="#EAF2FF" font-size="16" font-weight="700">React dashboard</text>
+    <text x="91" y="245" fill="#8DA0C3" font-size="12">Voice + text capture</text>
+    <text x="91" y="268" fill="#8DA0C3" font-size="12">Intent visualization</text>
+    <text x="91" y="291" fill="#8DA0C3" font-size="12">Quantum result panel</text>
+    <text x="91" y="314" fill="#8DA0C3" font-size="12">Live code + PR status</text>
+    <rect x="67" y="353" width="200" height="78" rx="16" fill="#0A1221" stroke="#213A58"/>
+    <path d="M91 378V406M98 371V413M105 384V400M112 375V409M119 380V404" stroke="#55D6FF" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="139" y="386" fill="#CEDAF0" font-size="12" font-weight="650">MediaRecorder</text>
+    <text x="139" y="406" fill="#7286AA" font-size="11">audio/webm</text>
+    <rect x="67" y="454" width="200" height="57" rx="15" fill="#11152A" stroke="#373969"/>
+    <circle cx="91" cy="482" r="5" fill="#7E80FF"/>
+    <text x="106" y="486" fill="#C4C9E8" font-size="11" font-weight="650">Server-Sent Events</text>
+
+    <rect x="328" y="126" width="568" height="410" rx="22" fill="#0B1120" stroke="#2E375A" filter="url(#shadow)"/>
+    <text x="352" y="157" fill="#899CFF" font-size="10" font-weight="700" letter-spacing="1.8">ORCHESTRATION + INTELLIGENCE</text>
+    <rect x="352" y="181" width="520" height="69" rx="17" fill="#10172B" stroke="#35426A"/>
+    <path d="M378 204H398L408 215L398 226H378L368 215L378 204Z" stroke="#8794FF" stroke-width="2"/>
+    <text x="426" y="211" fill="#EDF0FF" font-size="15" font-weight="700">FastAPI orchestration layer</text>
+    <text x="426" y="230" fill="#7789AC" font-size="11">validation · lifecycle · service routing · SSE streaming</text>
+
+    <path class="flow" d="M289 250H352" stroke="#5B86FF" stroke-width="2" marker-end="url(#arrowBlue)"/>
+    <text x="297" y="238" fill="#61769C" font-size="9" font-weight="650">HTTP</text>
+
+    <g transform="translate(352 284)">
+      <rect width="112" height="94" rx="16" fill="#0D1A2D" stroke="#285177"/>
+      <path d="M22 48V64M30 40V72M38 51V61" stroke="#55D6FF" stroke-width="2.4" stroke-linecap="round"/>
+      <text x="51" y="46" fill="#D9E9F7" font-size="12" font-weight="700">Watson</text>
+      <text x="51" y="64" fill="#7393B0" font-size="10">Speech to Text</text>
+    </g>
+    <g transform="translate(480 284)">
+      <rect width="112" height="94" rx="16" fill="#10172D" stroke="#3C437B"/>
+      <path d="M19 40H41M19 49H36M19 58H39M19 67H30" stroke="#8588FF" stroke-width="2.3" stroke-linecap="round"/>
+      <text x="51" y="46" fill="#E0E2F8" font-size="12" font-weight="700">Watson NLU</text>
+      <text x="51" y="64" fill="#8188B2" font-size="10">Structured intent</text>
+    </g>
+    <g transform="translate(608 284)">
+      <rect width="112" height="94" rx="16" fill="#15142D" stroke="#55468C"/>
+      <ellipse cx="31" cy="53" rx="18" ry="7" stroke="#A277FF" stroke-width="1.7"/>
+      <ellipse cx="31" cy="53" rx="18" ry="7" transform="rotate(60 31 53)" stroke="#A277FF" stroke-width="1.7"/>
+      <circle cx="31" cy="53" r="3" fill="#DAB2FF"/>
+      <text x="55" y="46" fill="#E8DFFF" font-size="12" font-weight="700">QOPE</text>
+      <text x="55" y="64" fill="#9785BC" font-size="10">QUBO + QAOA</text>
+    </g>
+    <g transform="translate(736 284)">
+      <rect width="136" height="94" rx="16" fill="#17132B" stroke="#65418A"/>
+      <path d="M18 41L9 53L18 65M42 41L51 53L42 65M35 34L25 72" stroke="#C168FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="61" y="46" fill="#F0E0FF" font-size="12" font-weight="700">watsonx</text>
+      <text x="61" y="64" fill="#A78ABA" font-size="10">Architect → code</text>
+    </g>
+
+    <path class="flow" d="M464 331H480M592 331H608M720 331H736" stroke="#7A7EFF" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+    <rect x="352" y="409" width="235" height="101" rx="17" fill="#0B1B25" stroke="#266257"/>
+    <path d="M380 436C380 429 395 425 406 425C417 425 432 429 432 436V476C432 483 417 487 406 487C395 487 380 483 380 476V436Z" stroke="#5EE8B1" stroke-width="2"/>
+    <ellipse cx="406" cy="436" rx="26" ry="11" stroke="#5EE8B1" stroke-width="2"/>
+    <text x="451" y="449" fill="#D9F5EB" font-size="13" font-weight="700">IBM Cloudant</text>
+    <text x="451" y="469" fill="#75A99B" font-size="10">Intent state + audit trail</text>
+
+    <rect x="606" y="409" width="266" height="101" rx="17" fill="#111529" stroke="#353A67"/>
+    <path d="M632 440H652V460H632ZM636 434V440M648 434V440M636 460V466M648 460V466" stroke="#9A91FF" stroke-width="2"/>
+    <text x="671" y="449" fill="#E3E2F8" font-size="13" font-weight="700">Repository context</text>
+    <text x="671" y="469" fill="#858BB0" font-size="10">Remote cache or local demo repo</text>
+
+    <path class="flow-back" d="M536 378V409M804 378V409" stroke="#54DDB0" stroke-width="1.8" marker-end="url(#arrowGreen)"/>
+    <path class="flow-back" d="M352 473H310C298 473 289 463 289 451V431" stroke="#54DDB0" stroke-width="1.8" marker-end="url(#arrowGreen)"/>
+    <text x="295" y="492" fill="#557D73" font-size="9" font-weight="650">SSE PROGRESS</text>
+
+    <rect x="935" y="126" width="220" height="410" rx="22" fill="#0E1222" stroke="#423665" filter="url(#shadow)"/>
+    <text x="959" y="157" fill="#C177FF" font-size="10" font-weight="700" letter-spacing="1.8">DELIVERY</text>
+    <rect x="957" y="181" width="176" height="197" rx="18" fill="#151329" stroke="#5B3C7D"/>
+    <circle cx="1045" cy="233" r="30" fill="#211638" stroke="#A05ADC"/>
+    <path d="M1032 235L1041 244L1059 222M1027 260H1063" stroke="#D68BFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="1045" y="298" fill="#F2E6FB" text-anchor="middle" font-size="16" font-weight="700">GitHub</text>
+    <text x="1045" y="324" fill="#9B83AD" text-anchor="middle" font-size="11">branch · commit · PR</text>
+    <rect x="982" y="344" width="126" height="22" rx="11" fill="#162A25" stroke="#2C6A59"/>
+    <circle cx="996" cy="355" r="4" fill="#5EE8B1"/>
+    <text x="1007" y="359" fill="#8FD4BE" font-size="9" font-weight="650">HUMAN REVIEW</text>
+    <path class="flow" d="M872 331H957" stroke="#AD63EF" stroke-width="2" marker-end="url(#arrowBlue)"/>
+    <rect x="957" y="409" width="176" height="101" rx="17" fill="#111426" stroke="#343758"/>
+    <text x="979" y="439" fill="#C9CDE4" font-size="11" font-weight="700">Generated-code CI</text>
+    <text x="979" y="462" fill="#77819E" font-size="10">Compile</text>
+    <text x="1041" y="462" fill="#77819E" font-size="10">Test</text>
+    <text x="1082" y="462" fill="#77819E" font-size="10">Review</text>
+    <path d="M979 479H1111" stroke="#28314E"/><path d="M979 479H1071" stroke="#5EE8B1" stroke-width="2"/>
+
+    <g transform="translate(49 570)">
+      <rect width="1102" height="39" rx="12" fill="#0D1322" stroke="#252E49"/>
+      <circle cx="22" cy="19.5" r="4" fill="#55D6FF"/><text x="35" y="24" fill="#7E91B5" font-size="10" font-weight="650">REQUEST PATH</text>
+      <circle cx="162" cy="19.5" r="4" fill="#5EE8B1"/><text x="175" y="24" fill="#7E91B5" font-size="10" font-weight="650">STATE + EVENTS</text>
+      <circle cx="318" cy="19.5" r="4" fill="#C168FF"/><text x="331" y="24" fill="#7E91B5" font-size="10" font-weight="650">DELIVERY PATH</text>
+      <text x="1077" y="24" fill="#536584" text-anchor="end" font-size="10">FastAPI · Pydantic · SSE</text>
+    </g>
+  </g>
+</svg>

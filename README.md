@@ -108,23 +108,30 @@ minimize  −Σ coverageᵢ·xᵢ + λΣ conflictᵢⱼ·xᵢ·xⱼ
 
 Qiskit converts that model for QAOA execution through IBM Quantum Runtime. The returned subset helps focus generation on a compact, lower-conflict implementation path.
 
-### 4. Build — watsonx + IBM Bob
+### 4. Build — watsonx repository orchestration
 
-watsonx enriches the structured request with code-oriented analysis. IBM Bob then provides the repository-aware workflow:
+The runtime uses `WatsonxCodeService` to execute a repository-aware Architect → Plan → Code sequence. `StreamingOrchestrator` emits typed Server-Sent Events throughout the run so the browser can render progress without polling.
 
-| Bob capability | Role inside PHRAXIS |
+| Runtime stage | Role inside PHRAXIS |
 |---|---|
-| Architect | Maps the target repository and identifies candidate locations |
+| Architect | Maps the target repository and identifies change locations |
 | Plan | Converts optimized candidates into ordered implementation steps |
 | Code | Produces changes that follow the repository’s existing patterns |
-| Orchestrate | Coordinates the multi-stage generation flow |
-| Review | Checks generated changes before publication |
+| Stream | Emits lifecycle and per-file progress events to the dashboard |
 
-Session artifacts are retained in [`bob_sessions/`](./bob_sessions/) for inspection.
+IBM Bob was used throughout project development, architecture, planning, and review. Those artifacts are retained in [`bob_sessions/`](./bob_sessions/) for inspection; the current runtime adapter executes generation through watsonx Granite.
 
 ### 5. Ship — GitHub
 
 PHRAXIS creates a feature branch, commits the generated files, and opens a pull request containing implementation context. The resulting PR remains the review and merge boundary.
+
+## ⬡ System architecture
+
+<div align="center">
+  <img src="./docs/assets/phraxis-architecture.svg" alt="PHRAXIS runtime architecture from React input through IBM services to GitHub" width="100%" />
+</div>
+
+The request path is synchronous until generation begins. Code generation then streams named SSE events—such as `architect_started`, `plan_complete`, `code_step`, and `complete`—back to the dashboard. Cloudant carries durable state across the stages, while GitHub remains the final human-review boundary.
 
 ## ◈ Product surface
 
