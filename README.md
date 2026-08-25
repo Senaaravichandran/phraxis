@@ -6,7 +6,7 @@
 
 ### Say the feature. Shape the intent. Ship the pull request.
 
-PHRAXIS turns a spoken engineering idea into a structured, repository-aware implementation flow—powered by IBM Watson, watsonx, IBM Quantum, IBM Bob, and GitHub.
+PHRAXIS turns a spoken engineering idea into a structured, repository-aware implementation flow—built with IBM Bob and powered at runtime by IBM Watson, watsonx, IBM Quantum, and GitHub.
 
 <p>
   <a href="#-quick-start"><strong>Run locally</strong></a>
@@ -29,6 +29,15 @@ PHRAXIS turns a spoken engineering idea into a structured, repository-aware impl
 
 </div>
 
+<table>
+  <tr>
+    <td align="center"><strong>5</strong><br/><sub>pipeline stages</sub></td>
+    <td align="center"><strong>10</strong><br/><sub>documented API routes</sub></td>
+    <td align="center"><strong>5</strong><br/><sub>connected IBM services</sub></td>
+    <td align="center"><strong>1</strong><br/><sub>human review boundary</sub></td>
+  </tr>
+</table>
+
 ---
 
 ## ✦ The idea
@@ -40,6 +49,9 @@ PHRAXIS joins those disconnected steps into one observable workflow.
 > “Add rate limiting: 100 requests per minute for free users, 1,000 for premium users, and return `429` with a `Retry-After` header.”
 
 That single request moves through speech recognition, intent extraction, candidate-change optimization, repository-aware code generation, and pull-request creation—while the dashboard shows every stage in real time.
+
+> [!NOTE]
+> PHRAXIS is a hackathon prototype that exercises live cloud APIs. A complete run requires configured IBM and GitHub credentials; generated changes should always be reviewed before merge.
 
 <table>
   <tr>
@@ -60,7 +72,7 @@ That single request moves through speech recognition, intent extraction, candida
 | The usual handoff | The PHRAXIS workflow |
 |---|---|
 | Ideas are manually rewritten as tickets | The original spoken request becomes the source of truth |
-| Codebase context is gathered repeatedly | IBM Bob works with repository-level context |
+| Codebase context is gathered repeatedly | Repository context is scanned once and carried through the run |
 | Candidate files are explored ad hoc | QOPE ranks a low-conflict implementation set |
 | Progress disappears inside an agent session | Every pipeline event streams into the dashboard |
 | The PR description is written after the fact | The original intent and implementation result travel together |
@@ -133,6 +145,23 @@ PHRAXIS creates a feature branch, commits the generated files, and opens a pull 
 
 The request path is synchronous until generation begins. Code generation then streams named SSE events—such as `architect_started`, `plan_complete`, `code_step`, and `complete`—back to the dashboard. Cloudant carries durable state across the stages, while GitHub remains the final human-review boundary.
 
+## ▶ Demo walkthrough
+
+Once the frontend and API are running, use this sequence to see the complete story:
+
+1. **Capture** — select voice mode and record the sample rate-limiting request, or paste it in text mode.
+2. **Verify** — inspect the transcript confidence and confirm the extracted action, target, parameters, and constraints.
+3. **Observe** — watch QOPE reduce the candidate list and surface its selected files.
+4. **Follow** — read Architect, Plan, and Code events as they stream into the live-code panel.
+5. **Review** — open the resulting GitHub pull request and inspect the diff before merging.
+
+<details>
+<summary><strong>Suggested 30-second demo prompt</strong></summary>
+
+> Add rate limiting to the payment service. Free users get 100 requests per minute and premium users get 1,000. Return HTTP 429 with a Retry-After header when the limit is exceeded, and add tests for both tiers.
+
+</details>
+
 ## ◈ Product surface
 
 The single-screen workspace keeps the pipeline readable without making the developer chase logs across tools.
@@ -156,7 +185,8 @@ The single-screen workspace keeps the pipeline readable without making the devel
 | Memory | IBM Cloudant | Persistent intent and pipeline state |
 | Reasoning | IBM watsonx | Codebase-oriented request enrichment |
 | Planning | Qiskit, IBM Quantum Runtime | QUBO construction and QAOA optimization |
-| Generation | IBM Bob | Repository architecture, planning, coding, and review |
+| Generation | IBM watsonx Granite | Repository analysis, planning, and code generation |
+| Development | IBM Bob | Architecture, implementation, review, and exported evidence |
 | Delivery | GitHub API, PyGithub | Branch, commit, and pull-request creation |
 
 ## 🚀 Quick start
@@ -168,7 +198,7 @@ The single-screen workspace keeps the pipeline readable without making the devel
 - IBM Cloud credentials for Watson STT, Watson NLU, Cloudant, and watsonx
 - An IBM Quantum token and configured backend
 - A GitHub personal access token with access to the target repository
-- IBM Bob available to the backend orchestration environment
+- IBM Bob only if you want to reproduce the project-development workflow and evidence
 
 ### 1 · Clone and configure
 
@@ -338,9 +368,48 @@ Run the repository’s pipeline checks:
 python test_pipeline.py
 ```
 
+`test_pipeline.py` expects the API to be running, calls configured cloud services, and pauses before the generation stage so you can choose whether to incur that full run.
+
+## 🧭 Troubleshooting
+
+<details>
+<summary><strong>The API exits during startup</strong></summary>
+
+`backend/env_loader.py` validates the IBM, watsonx, and GitHub variables before service initialization. Compare your `.env` with [`.env.example`](./.env.example), including `WATSONX_URL`, and restart the API after any change.
+
+</details>
+
+<details>
+<summary><strong>Voice capture does not start</strong></summary>
+
+Allow microphone access in the browser and use `localhost` or an HTTPS origin. If the device or browser does not expose `MediaRecorder`, switch to the built-in text mode to exercise the rest of the pipeline.
+
+</details>
+
+<details>
+<summary><strong>Quantum optimization returns an error</strong></summary>
+
+Confirm `IBM_QUANTUM_TOKEN` is active and that `IBM_QUANTUM_BACKEND` names a backend available to that account. The configured backend is resolved when QOPE executes, not when the React app starts.
+
+</details>
+
+<details>
+<summary><strong>Generation cannot resolve the target repository</strong></summary>
+
+Set `GITHUB_REPO_OWNER` and `GITHUB_REPO_NAME` for a remote target. For a local sandbox, set `DEMO_REPO_PATH` to an existing directory and pass that local reference to the generation endpoint.
+
+</details>
+
+<details>
+<summary><strong>The live progress panel appears frozen</strong></summary>
+
+The generation route uses `text/event-stream`. Connect the browser directly to port `8000` while developing, or disable response buffering in any reverse proxy between the client and FastAPI.
+
+</details>
+
 ## 🤖 IBM Bob evidence
 
-PHRAXIS was developed with IBM Bob and also uses Bob as a runtime orchestration layer. Exported architect logs, plans, session records, integration notes, and review material live in [`bob_sessions/`](./bob_sessions/).
+PHRAXIS was developed with IBM Bob. Exported architect logs, plans, session records, integration notes, and review material live in [`bob_sessions/`](./bob_sessions/). The current runtime keeps the same Architect → Plan → Code shape while executing those stages through watsonx Granite.
 
 This makes the project’s agent-assisted workflow inspectable instead of asking reviewers to trust a black box.
 
